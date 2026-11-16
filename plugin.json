@@ -1,0 +1,17 @@
+{
+  "id": "mpcairlink",
+  "name": "MPC AirLink",
+  "manufacturer": "sttm",
+  "author": "sttm",
+  "version": "1.0.0",
+  "format": "vst2",
+  "kind": "instrument",
+  "uid": "ArLk",
+  "numInputs": 0,
+  "numOutputs": 2,
+  "category": "Synth",
+  "file32": "VST/mpcairlink-arm32.so",
+  "file64": "VST/mpcairlink-arm64.so",
+  "description": "VBAN and classic AirPlay audio receiver with automatic source selection and a terminal-style MPC UI.",
+  "license": "MIT"
+}

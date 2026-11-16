@@ -1,0 +1,174 @@
+# MPC AirLink — sttm
+
+Нативный VST2-инструмент для Akai MPC Standalone: VBAN и AirPlay audio
+на стереовыход Plugin track. MPC OS **3.10.1+**, Gen1 ARMv7 hard-float и
+Gen2 AArch64. Терминальный интерфейс, зелёный акцент **#8fe07a**.
+
+| Поле | Значение |
+| --- | --- |
+| Имя в MPC / AirPlay | MPC AirLink |
+| Производитель | sttm |
+| ID | mpcairlink |
+| VST UID | ArLk |
+| Версия | 1.0.0 |
+| Входы / выходы | 0 / 2 |
+| VBAN | UDP 6980, ANY stream name |
+
+## Установка
+
+1. Распакуйте `dist/mpcairlink-1.0.0-mpc.zip` в корень SD/USB. Получится:
+   `VST2 Plugins/sttm - VST - MPC AirLink/`.
+2. На MPC OS 3.10.1+ включите Preferences → Enhancements (Beta) →
+   Enable Enhancements и External Plugin Support. Подождите несколько секунд,
+   затем перезапустите MPC.
+3. Создайте Plugin track: External Plugins → sttm → MPC AirLink.
+   Направьте выход дорожки на Main Out, снимите mute, установите громкость.
+   MIDI-ноты и запуск секвенсора не нужны.
+4. Оставьте носитель подключённым. Gen1/Gen2 бинарники уже лежат в одной
+   папке; хост выбирает нужную архитектуру автоматически.
+
+Старые выпуски до AirLink использовали другой UID. **AirLink — отдельный
+плагин**, поэтому старые дорожки и сохранённые пресеты не переадресуются
+автоматически. Замените инструмент вручную и сохраните копию проекта.
+При обновлении не перезаписывайте `.so` загруженного плагина; закройте
+проект/выключите MPC перед заменой папки на носителе.
+
+## Управление
+
+- **AUTO**: удерживает первый источник с поступающим аудио до паузы 700 ms.
+- **VBAN Only**: только VBAN; AirPlay helper и его объявление останавливаются.
+- **AirPlay Only**: только AirPlay audio.
+- **Jitter Buffer**: 10–150 ms, по умолчанию 40 ms. Для первого Wi-Fi-теста
+  удобно 150 ms. AirPlay использует эффективный минимум 120 ms;
+  это не сокращает его собственную протокольную задержку.
+- **Output Gain**: −24…+12 dB, по умолчанию 0 dB, со сглаживанием.
+  При положительном gain возможен уровень выше 0 dBFS.
+- **Q-Link 1/2/3**: источник / jitter / gain. Касание выбирает контрол,
+  двойное касание регулятора открывает большой редактор.
+- На STREAM: адрес MPC, RECEIVING/WAITING, имя/формат активного потока,
+  потерянные VBAN-пакеты, стереометры с затуханием.
+- На DIAG: Lost, Drop, XRUN, служба/буфер, текущие имя/формат.
+
+**Фильтра имён нет**: принимается поток с любым именем (ANY).
+Имя Stream1 в Tac — удобное соглашение, а не обязательное условие.
+Один активный источник — имя + IPv4 + source UDP port. Несколько потоков
+не микшируются. Используйте один экземпляр AirLink на MPC.
+
+## iPhone без стороннего приложения
+
+1. iPhone и MPC должны быть в одной LAN/Wi-Fi, без client isolation.
+2. Выберите AUTO или AirPlay Only.
+3. iPhone: Пункт управления → аудиоплеер → AirPlay → **MPC AirLink**.
+4. Включите музыку. На плагине появятся RECEIVING, AirPlay,
+   `44.1 kHz / 16-bit Stereo` и уровни L/R.
+
+Это AirPlay 1 / RAOP audio (ALAC, RSA/AES), не AirPlay 2, не видео,
+не «Повтор экрана». Задержка обычно порядка 2 секунд, поэтому для игры
+вживую предпочтительнее VBAN. Работает с приложениями, поддерживающими
+AirPlay. Apple: https://support.apple.com/en-gb/105068
+
+Обнаружение — multicast mDNS UDP 5353, сеанс — TCP 5000 и согласуемые
+UDP-порты. Если служба не появилась, проверьте multicast и сеть, затем
+переключите VBAN Only → AUTO. Конфликт TCP 5000 требует остановки другого
+AirPlay-приёмника. После изменения сетевого интерфейса может требоваться
+перезапуск службы таким же переключением.
+
+## Mac: Tac → VBAN
+
+Tac с поддержкой VBAN (опциональный внешний передатчик).
+Выберите **Send VBAN → MPC**, укажите IP с экрана AirLink, порт **6980**,
+имя **Stream1**. На MPC — VBAN Only, jitter 150 ms для первого теста,
+gain 0 dB. При запросе macOS разрешите запись системного аудио/экрана.
+
+```sh
+/path/to/tac --vban --no-menu --send-ip 192.0.2.10
+```
+
+Замените пример IP адресом MPC. Для короткого тестового тона без захвата:
+
+```sh
+/path/to/tac --test-tone --send-ip 192.0.2.10 --duration 10
+```
+
+Tac отправляет PCM16 LE / 48k stereo, 256 frames на пакет (1052 bytes,
+187.5 пакетов/сек). Меньшее число пакетов дало ровный тон в пользовательском
+тесте на MPC Key 61. SENDING (no ACK) подтверждает только локальную отправку
+UDP: проверяйте RECEIVING, уровни и звук на MPC.
+Используйте сборку Tac с режимом Send VBAN; она не входит в этот релиз.
+
+## VBAN Talkie (iPhone / Android)
+
+В исходящем потоке TX задайте IP MPC, UDP **6980**, имя Stream1,
+PCM signed 16-bit, **48000 Hz**, mono либо stereo. 44100 Hz тоже подходит.
+Разрешите микрофон и доступ к локальной сети, включите Talk/постоянную TX.
+Названия пунктов зависят от версии приложения. Talkie передаёт вход
+микрофона; AirLink не добавляет захват системного звука телефона.
+
+## Сборка и проверка
+
+Docker Desktop на macOS, доступ к Docker Hub/Debian при первой сборке:
+
+```sh
+./build.sh
+```
+
+Контейнер linux/amd64, Debian bookworm, GNU C++17:
+`arm-linux-gnueabihf-g++` для Gen1, `aarch64-linux-gnu-g++` для Gen2.
+libstdc++/libgcc включены в VST статически; GLIBC не выше 2.36.
+Зависимости AirPlay helper лежат отдельно в Content/AirPlay.
+
+- Папка: `build/VST2 Plugins/sttm - VST - MPC AirLink/`.
+- Установочный архив: `dist/mpcairlink-1.0.0-mpc.zip` и SHA256 рядом.
+- UI-превью: `build/UI-preview.png`; это иллюстрация, не скриншот MPC.
+- `./build.sh test`: ядро, SPSC, UDP, потери/reorder, host simulator.
+- `./build.sh airplay-test`: реальные RTSP/RTP PCM и зашифрованный ALAC через VST2.
+- `./build.sh sanitize`: ASan/UBSan, включая очередь VBAN и тест потерь.
+- `./build.sh arm32` / `arm64`: только соответствующий бинарник.
+- Дополнительные локальные тесты Tac требуют отдельной сборки передатчика.
+
+SDK validator проверяет UID/имя/производителя, ELF, экспорт VSTPluginMain,
+GLIBC, UI-ресурсы, индексы параметров и Q-Link. Предупреждение host simulator
+о тишине без сетевого передатчика ожидаемо. Логи — `build/host-test.log`,
+`build/airplay-test.log`, `build/airplay-alac-test.log`, `build/tac-vban-test.log`.
+На MPC Key 61 / MPC OS 3.10.1 работа версии 1.0.0 подтверждена пользователем 2026-11-16.
+Gen2 здесь проверяется компиляцией и анализом ELF; требуется отдельный
+тест на реальном Gen2. После установки проверьте касания/Q-Link, проект
+save/reload и длительное воспроизведение на MPC.
+
+## Реализация и ограничения
+
+UDP worker: nonblocking socket, poll, SO_REUSEADDR, getifaddrs. VBAN Audio:
+все 21 частота таблицы, PCM16/24/float32, mono/stereo; NaN/Inf заглушаются.
+Очередь 64 пакета ждёт reorder 2–12 ms; потерянный пакет сохраняет время
+с затуханием. Для переменных размеров пакетов длина пропуска оценивается
+по предыдущему. Нет FEC или восстановления исходного потерянного звука.
+
+SPSC — 32768 stereo float frames, 32-bit lock-free atomics, блочная запись.
+В processReplacing нет памяти, mutex, socket I/O или логов. Линейный SRC
+сохраняет фазу между пакетами; FIFO feedback до ±0.3% согласует независимые
+часы. Нет bandlimited anti-alias SRC; предпочтительны источники 44.1/48k.
+Сетевые провалы дольше буфера всё ещё приводят к rebuffer.
+
+AirPlay: отдельный bundled Shairport Sync 4.3.7 + TinySVCmDNS, без Avahi,
+D-Bus, ALSA или установки системных служб. Helper копируется в приватный
+/tmp каталог, зависимости загружаются только в дочерний процесс.
+При выгрузке он завершается и временные файлы удаляются. TinySVCmDNS
+помечен upstream как deprecated; обнаружение следует проверить в своей сети.
+
+Диагностика: Lost — невосстановленные вовремя VBAN-пакеты; Drop — сумма
+O (FIFO overflow) и T (отбрасывание большой очереди); XRUN — underrun.
+Один XRUN после остановки передачи нормален. R — reset от хоста,
+Q — заполнение FIFO в ms, H — объявленная частота хоста,
+C — сглаженная частота потребления аудиоколбэком.
+
+## Источники и лицензии
+
+- Open MPC: https://github.com/open-mpc/mpc-vst-plugins
+- Akai/inMusic SDK: https://github.com/inmusic-software/mpc-plugin-builder-sdk
+- VBAN: https://vb-audio.com/Voicemeeter/VBANProtocol_Specifications.pdf
+- Shairport Sync: https://github.com/mikebrady/shairport-sync
+
+Собственный код — MIT. Полные notices и лицензии зависимостей перечислены
+в THIRD_PARTY.md и включены в пакет. Подготовка каталога Open MPC описана
+в `design/terminal-v1/OPEN-MPC.md`; установочный ZIP сам по себе не является
+опубликованной записью каталога.

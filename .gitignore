@@ -1,0 +1,7 @@
+build/
+Content/
+dist/
+.sdk-tools/
+__pycache__/
+.DS_Store
+design/

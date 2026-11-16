@@ -1,0 +1,121 @@
+// VBAN UDP -> PCM float -> rate conversion -> SPSC -> prebuffer -> gain -> stereo.
+#include "mpc_plugin.h"
+#include "Receiver.h"
+#include <mutex>
+#include <cstdio>
+
+enum { Reserved, ReceiveMode, Latency, Gain, Address, Connection, StreamName, Format, Lost, MeterL, MeterR, Overflows, Underruns, AirPlayStatus };
+class MPCAirLink final : public mpc::Plugin {
+    airlink::Receiver receiver;
+    airlink::Renderer renderer;
+    std::mutex statusMutex; // Only worker and text formatting; never accessed by process().
+    airlink::Status status;
+    std::mutex latestMutex;
+    airlink::Status latestStatus;
+    std::atomic<bool> displayRunning{true};
+    std::thread displayThread;
+    std::array<std::string,5> text{};
+    std::string airplayText;
+    uint32_t seenEpoch=0;
+    float sampleRate=44100;
+    std::atomic<uint32_t> hostResets{0},hostFrames{0};
+    uint32_t previousFrames=0,diagnosticTick=0;
+    double measuredRate=0;
+    std::chrono::steady_clock::time_point previousMeasure=std::chrono::steady_clock::now();
+    static mpc::PluginInfo identity() {
+        mpc::PluginInfo i; i.name="MPC AirLink"; i.vendor="sttm";
+        i.uniqueId=MPC_FOURCC('A','r','L','k'); i.version=1000;
+        i.isInstrument=true; i.numInputs=0; i.numOutputs=2; return i;
+    }
+    void update(const airlink::Status& s) {
+        char fmt[64];
+        if(s.rate) std::snprintf(fmt,sizeof fmt,"%.4g kHz / %s %s",s.rate/1000.,s.format==1?"16-bit":s.format==2?"24-bit":"Float32",s.channels==1?"Mono":"Stereo");
+        else std::snprintf(fmt,sizeof fmt,"--");
+        std::array<std::string,5> next{{s.ip+" : 6980",s.error?"SOCKET ERROR "+std::to_string(s.error):s.receiving?"RECEIVING":"WAITING",s.name,fmt,"Lost: "+std::to_string(s.lost)}};
+        std::array<bool,5> changed{};
+        std::string ap=receiver.mode.load()==1?"AirPlay disabled":s.airplayReady?"AirPlay: MPC AirLink":s.airplayError?"AirPlay error "+std::to_string(s.airplayError):"AirPlay starting";
+        if(receiver.mode.load()==1) {
+            auto now=std::chrono::steady_clock::now();
+            double dt=std::chrono::duration<double>(now-previousMeasure).count();
+            uint32_t frames=hostFrames.load(std::memory_order_relaxed);
+            if(dt>0.01) {double rate=(frames-previousFrames)/dt; measuredRate+=std::min(1.0,dt/1.0)*(rate-measuredRate); previousFrames=frames; previousMeasure=now;}
+            int host=std::max(8000,receiver.hostRate.load());
+            unsigned depth=unsigned(uint64_t(receiver.ring.size())*1000/unsigned(host));
+            char diagnostic[64];
+            if((diagnosticTick++/20)%2==0) std::snprintf(diagnostic,sizeof diagnostic,"O%u T%u R%u Q%ums",s.overflows,renderer.discarded.load(),hostResets.load(),depth);
+            else std::snprintf(diagnostic,sizeof diagnostic,"H%.1fk C%.1fk Q%ums",host/1000.,measuredRate/1000.,depth);
+            ap=diagnostic;
+        }
+        bool apChanged=false;
+        {
+            std::lock_guard<std::mutex> lock(statusMutex);
+            status=s; apChanged=airplayText!=ap; airplayText=ap;
+            for(size_t n=0;n<5;++n) { changed[n]=text[n]!=next[n]; text[n]=next[n]; }
+        }
+        // Toggle a readout token only when its text changes. Host notification is worker-only.
+        for(int n=0;n<5;++n) if(changed[n]) { set(Address+n,1-get(Address+n)); notifyHostParameterChanged(Address+n); }
+        if(apChanged) {set(AirPlayStatus,1-get(AirPlayStatus)); notifyHostParameterChanged(AirPlayStatus);}
+        auto publish=[&](int index,float value) {
+            if(getNormalised(index)!=param(index).toNormalised(value)) {set(index,value); notifyHostParameterChanged(index);}
+        };
+        publish(MeterL,std::clamp(renderer.peakL.load(),0.f,1.f));
+        publish(MeterR,std::clamp(renderer.peakR.load(),0.f,1.f));
+        publish(Overflows,float(s.overflows)+float(renderer.discarded.load())); publish(Underruns,float(renderer.underruns.load()));
+    }
+public:
+    MPCAirLink() : mpc::Plugin(identity()) {
+        // Parameter zero is intentionally inert: MPC nudges it when loading an instrument.
+        auto inert=mpc::floatParam("host_reserved","Host",0,1,0); inert.automatable=false; addParam(inert);
+        addParam(mpc::choiceParam("receive_mode","Receive Mode",{"AUTO","VBAN Only","AirPlay Only"},0));
+        addParam(mpc::intParam("latency","Jitter Buffer",10,150,40,"ms"));
+        addParam(mpc::floatParam("gain","Output Gain",-24,12,0,"dB",1));
+        const char* ids[]={"address","connection","stream_name","stream_format","lost","meter_l","meter_r","overflows","underruns"};
+        const char* names[]={"MPC IP / UDP","Status","Active Stream","Audio Format","Lost Packets","Level L","Level R","Overflows","Underruns"};
+        for(int n=0;n<9;++n) { auto p=mpc::floatParam(ids[n],names[n],0,n>=7?16777215.f:1.f,0); p.automatable=false; addParam(p); }
+        auto ap=mpc::floatParam("airplay_status","AirPlay",0,1,0); ap.automatable=false; addParam(ap);
+        receiver.contentDirectory=mpc::detail::computePluginFolder()+"/Content";
+        receiver.onStatus=[this](const airlink::Status& s){std::lock_guard<std::mutex> lock(latestMutex); latestStatus=s;};
+        receiver.start();
+        // MPC host callbacks may be slow: never stop draining AirPlay/UDP to update a meter.
+        displayThread=std::thread([this] {
+            while(displayRunning.load(std::memory_order_acquire)) {
+                airlink::Status snapshot;
+                {std::lock_guard<std::mutex> lock(latestMutex); snapshot=latestStatus;}
+                update(snapshot);
+                for(int i=0;i<10 && displayRunning.load(std::memory_order_acquire);++i)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+        });
+    }
+    ~MPCAirLink() override { displayRunning.store(false,std::memory_order_release); if(displayThread.joinable()) displayThread.join(); receiver.stop(); }
+    void prepare(double rate,int) override { sampleRate=float(std::clamp(rate,8000.,192000.)); receiver.hostRate.store(int(sampleRate)); }
+    void reset() override {
+        hostResets.fetch_add(1,std::memory_order_relaxed);
+        // A network instrument has no note voices to reset. Re-preparing the host
+        // must not interrupt an already active VBAN stream or erase its prebuffer.
+        if(receiver.activeSource.load(std::memory_order_acquire)==1) return;
+        receiver.ring.discard(); renderer.reset();
+    }
+    void parameterChanged(int index,float value) override { if(index==ReceiveMode) receiver.mode.store(std::clamp(int(std::lround(value)),0,2)); if(index==Latency) receiver.latencyMs.store(std::clamp(int(std::lround(value)),10,150)); }
+    void process(mpc::ProcessContext& ctx) override {
+        auto epoch=receiver.epoch.load(std::memory_order_acquire);
+        if(epoch!=seenEpoch) { receiver.ring.discard(); renderer.rebuffer(); seenEpoch=epoch; }
+        hostFrames.fetch_add(uint32_t(ctx.numFrames),std::memory_order_relaxed);
+        if(ctx.numOutputs<2) return;
+        float latency=get(Latency);
+        if(receiver.activeSource.load(std::memory_order_acquire)==2) latency=std::max(latency,120.f);
+        renderer.render(receiver.ring,ctx.outputs[0],ctx.outputs[1],ctx.numFrames,int(latency*sampleRate/1000),std::pow(10.f,get(Gain)/20),true,int(sampleRate));
+    }
+    bool formatValue(int index,float value,std::string& out) override {
+        if(index==Latency || index==Gain || index==Overflows || index==Underruns) {
+            char b[64]; if(index==Latency) std::snprintf(b,sizeof b,"%.0f ms",double(value));
+            else if(index==Gain) std::snprintf(b,sizeof b,"%.1f dB",double(value));
+            else std::snprintf(b,sizeof b,"%s: %.0f",index==Overflows?"Drop":"XRUN",double(value));
+            out=b; return true;
+        }
+        if(index==AirPlayStatus) { std::lock_guard<std::mutex> lock(statusMutex); out=airplayText; return true; }
+        if(index>=Address && index<=Lost) { std::lock_guard<std::mutex> lock(statusMutex); out=text[size_t(index-Address)]; return true; }
+        return false;
+    }
+};
+MPC_PLUGIN_ENTRY(MPCAirLink)
