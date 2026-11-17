@@ -138,7 +138,8 @@ public:
             gain+=0.002f*(target-gain);
             l[i]=last.l*gain; r[i]=last.r*gain; pl=std::max(pl,std::fabs(l[i])); pr=std::max(pr,std::fabs(r[i]));
         }
-        peakL.store(std::max(pl,peakL.load()*0.85f)); peakR.store(std::max(pr,peakR.load()*0.85f));
+        // Accumulate block peaks until the UI samples them. Release uses elapsed time in the UI.
+        peakL.store(std::max(pl,peakL.load())); peakR.store(std::max(pr,peakR.load()));
     }
 };
 }

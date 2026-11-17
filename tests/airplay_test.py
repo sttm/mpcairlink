@@ -99,7 +99,7 @@ try:
     start=time.monotonic(); discovered=False; vban=udp()
     for packet in range(750):
         ts=stamp+packet*352
-        if packet==400: fx.setParameter(e,1,0) # AUTO keeps an already-playing AirPlay source.
+        if packet==400: fx.setParameter(e,1,0) # Legacy AUTO value now maps to explicit AirPlay.
         if packet>=400:
             vp=struct.pack('<4sBBBB16sI',b'VBAN',3,127,1,1,b'Stream1',packet)+struct.pack('<256h',*([28000]*256))
             vban.sendto(vp,('127.0.0.1',6980))
@@ -130,17 +130,19 @@ try:
         time.sleep(max(0,start+(packet+1)*352/44100-time.monotonic()))
     print('AirPlay status:',display(13),'connection:',display(5),'source:',display(6),flush=True)
     request('TEARDOWN')
+    rtsp.close();rtsp=socket.create_connection(('127.0.0.1',5000),1);rtsp.settimeout(3)
+    request('OPTIONS') # Listener must accept a fresh client after teardown.
     assert max(map(abs,rendered),default=0)>.05,'No PCM from RAOP reached VST output'
     assert display(6)=='AirPlay',display(6)
-    assert stereo_error[0]<max(1,len(rendered))*0.001,'AUTO mixed VBAN into the active AirPlay source'
+    assert stereo_error[0]<max(1,len(rendered))*0.001,'AirPlay source mixed in VBAN'
     assert discovered,'DNS-SD RAOP announcement not observed'
     # AirPlay Only must reject VBAN; after switching, the listener must stop.
-    fx.setParameter(e,1,.5); time.sleep(.5)
-    assert display(13).startswith(('O','H')),display(13) # VBAN diagnostics replace the disabled label.
+    fx.setParameter(e,14,1); time.sleep(.8)
+    assert display(13).startswith('VBAN'),display(13) # VBAN diagnostics replace the disabled label.
     try:
         probe=socket.create_connection(('127.0.0.1',5000),.1); probe.close(); raise AssertionError('AirPlay listener remained in VBAN Only')
     except (ConnectionRefusedError,socket.timeout): pass
-    print(('Encrypted ALAC: ' if encrypted else 'PCM: ')+ 'PASS real VST2 AirPlay: mDNS discovery, RTSP OPTIONS/ANNOUNCE/SETUP/RECORD, NTP/RTP PCM audio, source status, VBAN Only stops service',flush=True)
+    print(('Encrypted ALAC: ' if encrypted else 'PCM: ')+ 'PASS real VST2 AirPlay: mDNS discovery, RTSP OPTIONS/ANNOUNCE/SETUP/RECORD, NTP/RTP PCM audio, source status, reconnect OPTIONS after teardown, VBAN stops service',flush=True)
 finally:
     alive=False
     if audio_thread: audio_thread.join()

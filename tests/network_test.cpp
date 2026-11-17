@@ -8,10 +8,11 @@
 #include <vector>
 using namespace std::chrono_literals;
 int main() {
-    MPCAirLink plugin; plugin.set(ReceiveMode,1); plugin.prepare(44100,512); plugin.set(Latency,40);
+    MPCAirLink plugin; assert(plugin.getInt(SourceMode)==0&&plugin.getInt(ReceiveMode)==2);
+    plugin.set(SourceMode,1);assert(plugin.getInt(ReceiveMode)==1);plugin.set(SourceMode,0);assert(plugin.getInt(ReceiveMode)==2);plugin.set(ReceiveMode,0);assert(plugin.getInt(SourceMode)==0);plugin.set(ReceiveMode,1); plugin.prepare(44100,512); plugin.set(Latency,40);
     assert(std::string(plugin.info().name)=="MPC AirLink");
     assert(plugin.info().uniqueId==MPC_FOURCC('A','r','L','k'));
-    assert(plugin.numParams()==14 && plugin.param(1).id=="receive_mode");
+    assert(plugin.numParams()==16 && plugin.param(1).id=="receive_mode");
     for(int i=0;i<plugin.numParams();++i) assert(plugin.param(i).id!="stream_filter");
     int sock=socket(AF_INET,SOCK_DGRAM,0); assert(sock>=0);
     sockaddr_in dest{}; dest.sin_family=AF_INET; dest.sin_port=htons(6980); inet_pton(AF_INET,"127.0.0.1",&dest.sin_addr);
@@ -30,7 +31,7 @@ int main() {
     };
     auto waitText=[&](int index,const std::string& expected) {
         std::string value;
-        for(int i=0;i<25;++i) {plugin.formatValue(index,0,value); if(value==expected) return; std::this_thread::sleep_for(20ms);}
+        for(int i=0;i<40;++i) {plugin.formatValue(index,0,value); if(value==expected) return; std::this_thread::sleep_for(20ms);}
         std::cerr<<"Expected text: "<<expected<<"; actual: "<<value<<std::endl;
         assert(false);
     };
@@ -55,7 +56,7 @@ int main() {
     for(int i=0;i<400;++i) { plugin.process(ctx); }
     assert(l[127]==0 && r[127]==0);
     std::string text; plugin.formatValue(Connection,0,text); assert(text=="RECEIVING");
-    std::this_thread::sleep_for(850ms); plugin.formatValue(Connection,0,text); assert(text=="WAITING");
+    std::this_thread::sleep_for(850ms); waitText(Connection,"WAITING");
     // ANY accepts the next sender without configuring a stream-name filter.
     for(uint32_t seq: {0xfffffffeu,0xffffffffu,0u,3u,3u,2u}) send(seq,"iPhone",1,2,16);
     std::this_thread::sleep_for(150ms);

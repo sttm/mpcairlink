@@ -37,12 +37,20 @@ build/vban_queue_test: tests/vban_queue_test.cpp src/VbanQueue.h src/StreamCore.
 build/vban_loss_test: tests/vban_loss_test.cpp src/Receiver.cpp src/AirPlayProcess.cpp $(HEADERS)
 	mkdir -p build
 	$(CXX) $(CXXFLAGS) tests/vban_loss_test.cpp src/Receiver.cpp src/AirPlayProcess.cpp -o $@
-test: build/native/mpcairlink.so build/host_sim build/core_test build/network_test build/jitter_test build/vban_queue_test build/vban_loss_test
+build/listening_soak: tests/listening_soak.cpp src/StreamCore.h
+	mkdir -p build
+	$(CXX) $(CXXFLAGS) $< -o $@
+build/eco_ui_test: tests/eco_ui_test.cpp $(SOURCES) $(HEADERS)
+	mkdir -p build
+	$(CXX) $(CXXFLAGS) $< src/Receiver.cpp src/AirPlayProcess.cpp -o $@
+test: build/native/mpcairlink.so build/host_sim build/core_test build/network_test build/jitter_test build/vban_queue_test build/vban_loss_test build/listening_soak build/eco_ui_test
 	./build/core_test
 	./build/jitter_test
+	./build/listening_soak
 	./build/vban_queue_test
 	./build/vban_loss_test
 	./build/network_test
+	./build/eco_ui_test
 	./build/host_sim build/native/mpcairlink.so dump > build/params.json
 	./build/host_sim build/native/mpcairlink.so test --seconds 1 --wav build/host-test.wav > build/host-test.log 2>&1
 	cat build/host-test.log

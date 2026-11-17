@@ -1,0 +1,145 @@
+{
+  "version": "1.1.1",
+  "size": 4896006,
+  "defer": true,
+  "sha256": "a129120651638783875810640b859b35bb015db02dad29a71e4cd874e522a6bd",
+  "param_compat": 1,
+  "max_glibc": "2.36",
+  "cpu": null,
+  "requires": "MPC OS 3.10.1+; local network; one AirLink instance per MPC",
+  "manifest": {
+    "schema": 1,
+    "id": "mpcairlink",
+    "name": "MPC AirLink",
+    "version": "1.1.1",
+    "kind": "instrument",
+    "uid": "41724c6b",
+    "manufacturer": "sttm",
+    "layout": "portable",
+    "so": "VST/mpcairlink-arm64.so",
+    "skin": "sttm - VST - MPC AirLink",
+    "folder": "portable/sttm - VST - MPC AirLink",
+    "extras": [],
+    "user_data": [],
+    "retire": [],
+    "user_files": [],
+    "arch": "aarch64",
+    "max_glibc": "2.36",
+    "os_compat": [
+      "3.x"
+    ],
+    "param_compat": 1,
+    "about": "Low-resource VBAN and classic AirPlay receiver with a clear touchscreen UI.",
+    "requires": "MPC OS 3.10.1+; local network; one AirLink instance per MPC",
+    "source_repo": "sttm/mpcairlink",
+    "license": "MIT AND BSD-3-Clause AND Apache-2.0 AND LGPL-2.1-or-later",
+    "cpu": null,
+    "vst2": true
+  },
+  "flags": {
+    "portable/sttm - VST - MPC AirLink/Content/AirPlay/lib-arm32/libcrypto.so.3": {
+      "network": [
+        "accept",
+        "bind",
+        "connect",
+        "getaddrinfo",
+        "gethostbyname",
+        "listen",
+        "recvfrom",
+        "sendto",
+        "socket"
+      ],
+      "loads code at runtime": [
+        "dlopen"
+      ]
+    },
+    "portable/sttm - VST - MPC AirLink/Content/AirPlay/lib-arm32/libpopt.so.0": {
+      "runs programs": [
+        "execvp"
+      ],
+      "changes the system": [
+        "setgid",
+        "setuid"
+      ]
+    },
+    "portable/sttm - VST - MPC AirLink/Content/AirPlay/lib-arm64/libcrypto.so.3": {
+      "network": [
+        "accept",
+        "bind",
+        "connect",
+        "getaddrinfo",
+        "gethostbyname",
+        "listen",
+        "recvfrom",
+        "sendto",
+        "socket"
+      ],
+      "loads code at runtime": [
+        "dlopen"
+      ]
+    },
+    "portable/sttm - VST - MPC AirLink/Content/AirPlay/lib-arm64/libpopt.so.0": {
+      "runs programs": [
+        "execvp"
+      ],
+      "changes the system": [
+        "setgid",
+        "setuid"
+      ]
+    },
+    "portable/sttm - VST - MPC AirLink/Content/AirPlay/shairport-sync-arm32": {
+      "network": [
+        "accept",
+        "bind",
+        "getaddrinfo",
+        "listen",
+        "recv",
+        "recvfrom",
+        "sendto",
+        "socket"
+      ],
+      "runs programs": [
+        "execv",
+        "fork",
+        "popen"
+      ]
+    },
+    "portable/sttm - VST - MPC AirLink/Content/AirPlay/shairport-sync-arm64": {
+      "network": [
+        "accept",
+        "bind",
+        "getaddrinfo",
+        "listen",
+        "recv",
+        "recvfrom",
+        "sendto",
+        "socket"
+      ],
+      "runs programs": [
+        "execv",
+        "fork",
+        "popen"
+      ]
+    },
+    "portable/sttm - VST - MPC AirLink/VST/mpcairlink-arm64.so": {
+      "network": [
+        "bind",
+        "recvfrom",
+        "socket"
+      ],
+      "runs programs": [
+        "posix_spawn"
+      ]
+    }
+  },
+  "os_compat": [
+    "3.x"
+  ],
+  "os_compat_why": [
+    "needs glibc 2.36, MPC OS 2.x has about 2.32",
+    "TUI:data:(local widget) version 1 has field(s) 2.15.1 does not use: actions, overlayType, polarityType, scaleType, showMinusSign",
+    "TUI:data:Button version 2 (2.15.1 uses 1)",
+    "TUI:data:Image version 2 has field(s) 2.15.1 does not use: animated",
+    "TUI:data:Knob version 3 (2.15.1 uses 1, 2)"
+  ]
+}

@@ -10,6 +10,8 @@
 #include <fcntl.h>
 #include <cerrno>
 #include <chrono>
+#include <pthread.h>
+#include <sched.h>
 
 namespace airlink {
 using Clock=std::chrono::steady_clock;
@@ -27,6 +29,7 @@ static std::string localIP() {
     freeifaddrs(list); return result;
 }
 void Receiver::run() {
+    sched_param normal{};(void)pthread_setschedparam(pthread_self(),SCHED_OTHER,&normal);
     Status status; status.ip=localIP();
     int fd=socket(AF_INET,SOCK_DGRAM|SOCK_CLOEXEC,0);
     if(fd<0) status.error=errno;
@@ -65,7 +68,7 @@ void Receiver::run() {
         if(rate!=oldHost) {resampler.reset(); airplayResampler.reset(); epoch.fetch_add(1,std::memory_order_release); oldHost=rate;}
         if(locked && now-last>std::chrono::milliseconds(700)) resetStream();
         if(now-ipTime>std::chrono::seconds(3)) { status.ip=localIP(); ipTime=now; }
-        if(now-ui>=std::chrono::milliseconds(20)) { if(onStatus) onStatus(status); ui=now; }
+        if(now-ui>=std::chrono::milliseconds(100)) { if(onStatus) onStatus(status); ui=now; }
         auto milliseconds=[] {return uint32_t(std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now().time_since_epoch()).count());};
         uint32_t reorderWait=uint32_t(std::clamp(latencyMs.load()/4,2,12));
         std::array<Stereo,256> converted{}; uint32_t convertedCount=0;

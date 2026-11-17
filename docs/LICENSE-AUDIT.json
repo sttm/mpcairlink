@@ -1,0 +1,39 @@
+{
+  "version": "1.1.1",
+  "date": "2026-11-18",
+  "shairport_commit": "0b1c4391ffd398e7b145eb4b98416261380adeea",
+  "evidence": "Generated config.h and Makefile plus compiler .deps/*.Po from the clean Docker build; upstream Makefile.am conditionals.",
+  "builds": [
+    {
+      "architecture": "arm32",
+      "helper_sha256": "4973c03f5b3313284624bac9251b4bdfb4fcffc8ac35f0ad3ad284fe3f0ae58b",
+      "airplay2": false,
+      "convolution": false,
+      "compiler_dependency_files_checked": 38,
+      "excluded_headers_and_sources": [
+        "nqptp-shm-structures.h",
+        "FFTConvolver/",
+        "ptp-utilities.c"
+      ],
+      "excluded_dependencies_absent": true
+    },
+    {
+      "architecture": "arm64",
+      "helper_sha256": "5d8a9effd81cfdd2804f101286bf006254d680970fb7b5f13f0582ab1e4b4219",
+      "airplay2": false,
+      "convolution": false,
+      "compiler_dependency_files_checked": 38,
+      "excluded_headers_and_sources": [
+        "nqptp-shm-structures.h",
+        "FFTConvolver/",
+        "ptp-utilities.c"
+      ],
+      "excluded_dependencies_absent": true
+    }
+  ],
+  "icon": {
+    "source": "https://www.svgrepo.com/svg/437698/airplay",
+    "license": "CC0-1.0"
+  },
+  "font_binaries_shipped": false
+}

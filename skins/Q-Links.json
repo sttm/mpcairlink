@@ -12,7 +12,7 @@
                 "SubTab": 1,
                 "Bank Direction": "Row",
                 "Q-Links": {
-                    "Q-Link 1": 1,
+                    "Q-Link 1": 14,
                     "Q-Link 2": 2,
                     "Q-Link 3": 3,
                     "Q-Link 4": -1,
@@ -35,7 +35,7 @@
                 "SubTab": 1,
                 "Bank Direction": "Row",
                 "Q-Links": {
-                    "Q-Link 1": -1,
+                    "Q-Link 1": 15,
                     "Q-Link 2": -1,
                     "Q-Link 3": -1,
                     "Q-Link 4": -1,
@@ -56,7 +56,7 @@
         ]
     },
     "Program Mode Q-Links": {
-        "Q-Link 1": 1,
+        "Q-Link 1": 14,
         "Q-Link 2": 2,
         "Q-Link 3": 3,
         "Q-Link 4": -1,

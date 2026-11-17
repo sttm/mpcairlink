@@ -231,6 +231,35 @@
                             "version": 2,
                             "componentData": {
                                 "version": 1,
+                                "name": "AirPlay receiver card",
+                                "type": "Image",
+                                "data": {
+                                    "version": 2,
+                                    "imageType": "Regular",
+                                    "colour": "00000000",
+                                    "image": "airplay-card.png"
+                                }
+                            },
+                            "handle remapping": {
+                                "version": 1,
+                                "map": []
+                            },
+                            "bounds": {
+                                "version": 2,
+                                "acceptsHWFocus": "No",
+                                "showWhenDataModelInvalid": "Show",
+                                "whenVisible": "Always",
+                                "boundsType": "Absolute",
+                                "bounds": "40 100 746 134",
+                                "additionalInvalidatingHandles": [
+                                    "IndexedEnabling/0/2/Parameter 14"
+                                ]
+                            }
+                        },
+                        {
+                            "version": 2,
+                            "componentData": {
+                                "version": 1,
                                 "name": "address",
                                 "type": "Label",
                                 "data": {
@@ -261,12 +290,15 @@
                                 ]
                             },
                             "bounds": {
-                                "version": 1,
+                                "version": 2,
                                 "acceptsHWFocus": "No",
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "60 145 705 51"
+                                "bounds": "60 145 705 51",
+                                "additionalInvalidatingHandles": [
+                                    "IndexedEnabling/1/2/Parameter 14"
+                                ]
                             }
                         },
                         {
@@ -441,14 +473,14 @@
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "AUTO",
+                                "name": "AirPlay",
                                 "type": "Button",
                                 "data": {
                                     "version": 2,
-                                    "onImage": "AUTO_on.png",
-                                    "offImage": "AUTO_off.png",
+                                    "onImage": "AirPlay_on.png",
+                                    "offImage": "AirPlay_off.png",
                                     "buttonId": 0,
-                                    "numButtonsInGroup": 3,
+                                    "numButtonsInGroup": 2,
                                     "handleName": "Data",
                                     "gestureBehaviour": "Instant"
                                 }
@@ -458,7 +490,7 @@
                                 "map": [
                                     {
                                         "key": "Data",
-                                        "value": "Parameter 1"
+                                        "value": "Parameter 14"
                                     }
                                 ]
                             },
@@ -468,21 +500,21 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "40 285 380 64"
+                                "bounds": "40 285 590 64"
                             }
                         },
                         {
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "VBAN Only",
+                                "name": "VBAN",
                                 "type": "Button",
                                 "data": {
                                     "version": 2,
-                                    "onImage": "VBAN_Only_on.png",
-                                    "offImage": "VBAN_Only_off.png",
+                                    "onImage": "VBAN_on.png",
+                                    "offImage": "VBAN_off.png",
                                     "buttonId": 1,
-                                    "numButtonsInGroup": 3,
+                                    "numButtonsInGroup": 2,
                                     "handleName": "Data",
                                     "gestureBehaviour": "Instant"
                                 }
@@ -492,7 +524,7 @@
                                 "map": [
                                     {
                                         "key": "Data",
-                                        "value": "Parameter 1"
+                                        "value": "Parameter 14"
                                     }
                                 ]
                             },
@@ -502,41 +534,7 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "450 285 380 64"
-                            }
-                        },
-                        {
-                            "version": 2,
-                            "componentData": {
-                                "version": 1,
-                                "name": "AirPlay Only",
-                                "type": "Button",
-                                "data": {
-                                    "version": 2,
-                                    "onImage": "AirPlay_Only_on.png",
-                                    "offImage": "AirPlay_Only_off.png",
-                                    "buttonId": 2,
-                                    "numButtonsInGroup": 3,
-                                    "handleName": "Data",
-                                    "gestureBehaviour": "Instant"
-                                }
-                            },
-                            "handle remapping": {
-                                "version": 1,
-                                "map": [
-                                    {
-                                        "key": "Data",
-                                        "value": "Parameter 1"
-                                    }
-                                ]
-                            },
-                            "bounds": {
-                                "version": 1,
-                                "acceptsHWFocus": "No",
-                                "showWhenDataModelInvalid": "Show",
-                                "whenVisible": "Always",
-                                "boundsType": "Absolute",
-                                "bounds": "860 285 380 64"
+                                "bounds": "650 285 590 64"
                             }
                         },
                         {
@@ -686,24 +684,25 @@
                             "componentData": {
                                 "version": 1,
                                 "name": "level 9",
-                                "type": "Meter",
+                                "type": "Image",
                                 "data": {
-                                    "version": 3,
-                                    "direction": "Right",
-                                    "invert": false,
-                                    "inactiveImage": "terminal-meter-off.png",
-                                    "peakImage": "terminal-meter-on.png",
-                                    "rmsImage": "terminal-meter-on.png",
-                                    "peakHandle": "Parameter 9",
-                                    "rmsHandle": "Parameter 9",
-                                    "peakHoldHandle": "Hold/Parameter 9",
-                                    "peakHoldSize": 2,
-                                    "peakHoldColour": "ffe3eadf"
+                                    "version": 2,
+                                    "imageType": "FilmStrip",
+                                    "colour": "00000000",
+                                    "image": "terminal-meter-strip.png",
+                                    "numFrames": 23,
+                                    "handleName": "Data",
+                                    "animated": false
                                 }
                             },
                             "handle remapping": {
                                 "version": 1,
-                                "map": []
+                                "map": [
+                                    {
+                                        "key": "Data",
+                                        "value": "Parameter 9"
+                                    }
+                                ]
                             },
                             "bounds": {
                                 "version": 1,
@@ -719,24 +718,25 @@
                             "componentData": {
                                 "version": 1,
                                 "name": "level 10",
-                                "type": "Meter",
+                                "type": "Image",
                                 "data": {
-                                    "version": 3,
-                                    "direction": "Right",
-                                    "invert": false,
-                                    "inactiveImage": "terminal-meter-off.png",
-                                    "peakImage": "terminal-meter-on.png",
-                                    "rmsImage": "terminal-meter-on.png",
-                                    "peakHandle": "Parameter 10",
-                                    "rmsHandle": "Parameter 10",
-                                    "peakHoldHandle": "Hold/Parameter 10",
-                                    "peakHoldSize": 2,
-                                    "peakHoldColour": "ffe3eadf"
+                                    "version": 2,
+                                    "imageType": "FilmStrip",
+                                    "colour": "00000000",
+                                    "image": "terminal-meter-strip.png",
+                                    "numFrames": 23,
+                                    "handleName": "Data",
+                                    "animated": false
                                 }
                             },
                             "handle remapping": {
                                 "version": 1,
-                                "map": []
+                                "map": [
+                                    {
+                                        "key": "Data",
+                                        "value": "Parameter 10"
+                                    }
+                                ]
                             },
                             "bounds": {
                                 "version": 1,
@@ -1053,6 +1053,74 @@
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
                                 "bounds": "660 432 560 48"
+                            }
+                        },
+                        {
+                            "version": 2,
+                            "componentData": {
+                                "version": 1,
+                                "name": "meter refresh 10",
+                                "type": "Button",
+                                "data": {
+                                    "version": 2,
+                                    "onImage": "refresh10_on.png",
+                                    "offImage": "refresh10_off.png",
+                                    "buttonId": 0,
+                                    "numButtonsInGroup": 2,
+                                    "handleName": "Data",
+                                    "gestureBehaviour": "Instant"
+                                }
+                            },
+                            "handle remapping": {
+                                "version": 1,
+                                "map": [
+                                    {
+                                        "key": "Data",
+                                        "value": "Parameter 15"
+                                    }
+                                ]
+                            },
+                            "bounds": {
+                                "version": 1,
+                                "acceptsHWFocus": "No",
+                                "showWhenDataModelInvalid": "Show",
+                                "whenVisible": "Always",
+                                "boundsType": "Absolute",
+                                "bounds": "840 530 180 48"
+                            }
+                        },
+                        {
+                            "version": 2,
+                            "componentData": {
+                                "version": 1,
+                                "name": "meter refresh 24",
+                                "type": "Button",
+                                "data": {
+                                    "version": 2,
+                                    "onImage": "refresh24_on.png",
+                                    "offImage": "refresh24_off.png",
+                                    "buttonId": 1,
+                                    "numButtonsInGroup": 2,
+                                    "handleName": "Data",
+                                    "gestureBehaviour": "Instant"
+                                }
+                            },
+                            "handle remapping": {
+                                "version": 1,
+                                "map": [
+                                    {
+                                        "key": "Data",
+                                        "value": "Parameter 15"
+                                    }
+                                ]
+                            },
+                            "bounds": {
+                                "version": 1,
+                                "acceptsHWFocus": "No",
+                                "showWhenDataModelInvalid": "Show",
+                                "whenVisible": "Always",
+                                "boundsType": "Absolute",
+                                "bounds": "1040 530 180 48"
                             }
                         }
                     ]
