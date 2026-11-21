@@ -3,7 +3,7 @@
   "name": "MPC AirLink",
   "manufacturer": "sttm",
   "author": "sttm",
-  "version": "1.1.1",
+  "version": "1.3.0",
   "format": "vst2",
   "kind": "instrument",
   "uid": "ArLk",
@@ -12,6 +12,6 @@
   "category": "Synth",
   "file32": "VST/mpcairlink-arm32.so",
   "file64": "VST/mpcairlink-arm64.so",
-  "description": "Low-resource VBAN and classic AirPlay receiver with a clear touchscreen UI.",
+  "description": "AirPlay and VBAN stereo receiver with a cached physical front-panel skin.",
   "license": "MIT"
 }

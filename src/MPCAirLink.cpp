@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <sched.h>
 
-enum { Reserved, ReceiveMode, Latency, Gain, Address, Connection, StreamName, Format, Lost, MeterL, MeterR, Overflows, Underruns, AirPlayStatus, SourceMode, MeterRefresh };
+enum { Reserved, ReceiveMode, Latency, Gain, Address, Connection, StreamName, Format, Lost, MeterL, MeterR, Overflows, Underruns, AirPlayStatus, SourceMode, MeterRefresh, BufferTexture, OutputTexture };
 class MPCAirLink final : public mpc::Plugin {
     airlink::Receiver receiver;
     airlink::Renderer renderer;
@@ -20,11 +20,12 @@ class MPCAirLink final : public mpc::Plugin {
     std::string airplayText;
     uint32_t seenEpoch=0;int publishedSource=-1;
     float meterEnvelopeL=0,meterEnvelopeR=0;
+    float lastTextureValue=-1; // Display worker only; only Output is animated.
     float sampleRate=44100;
     std::atomic<uint32_t> hostResets{0};
     static mpc::PluginInfo identity() {
         mpc::PluginInfo i; i.name="MPC AirLink"; i.vendor="sttm";
-        i.uniqueId=MPC_FOURCC('A','r','L','k'); i.version=1110;
+        i.uniqueId=MPC_FOURCC('A','r','L','k'); i.version=1300;
         i.isInstrument=true; i.numInputs=0; i.numOutputs=2; return i;
     }
     void update(const airlink::Status& s) {
@@ -58,6 +59,15 @@ class MPCAirLink final : public mpc::Plugin {
         };
         publish(Overflows,float(s.overflows)+float(renderer.discarded.load())); publish(Underruns,float(renderer.underruns.load()));
     }
+    void updateTextures() {
+        float value=getNormalised(Gain);
+        if(value==lastTextureValue)return;
+        lastTextureValue=value;
+        // Two center images, one change per five degrees. Preserve the
+        // shipped 0..5 auxiliary parameter ranges; use their endpoints.
+        float next=(int(std::clamp(value,0.f,1.f)*54)%2)?5.f:0.f;
+        if(get(OutputTexture)!=next){set(OutputTexture,next);notifyHostParameterChanged(OutputTexture);}
+    }
     void updateMeters(double elapsed) {
 #ifdef AIRLINK_METER_FRAME_HOOK
         AIRLINK_METER_FRAME_HOOK();
@@ -76,14 +86,18 @@ public:
         // Parameter zero is intentionally inert: MPC nudges it when loading an instrument.
         auto inert=mpc::floatParam("host_reserved","Host",0,1,0); inert.automatable=false; addParam(inert);
         addParam(mpc::choiceParam("receive_mode","Receive Mode",{"AirPlay","VBAN Only","AirPlay Only"},2));
-        addParam(mpc::intParam("latency","Jitter Buffer",10,150,40,"ms"));
+        addParam(mpc::intParam("latency","Jitter Buffer",10,150,120,"ms"));
         addParam(mpc::floatParam("gain","Output Gain",-24,12,0,"dB",1));
         const char* ids[]={"address","connection","stream_name","stream_format","lost","meter_l","meter_r","overflows","underruns"};
         const char* names[]={"MPC IP / UDP","Status","Active Stream","Audio Format","Lost Packets","Level L","Level R","Overflows","Underruns"};
         for(int n=0;n<9;++n) { auto p=mpc::floatParam(ids[n],names[n],0,n>=7?16777215.f:1.f,0); p.automatable=false; addParam(p); }
         auto ap=mpc::floatParam("airplay_status","AirPlay",0,1,0); ap.automatable=false; addParam(ap);
         addParam(mpc::choiceParam("source_mode","Source",{"AirPlay","VBAN"},0));
-        addParam(mpc::choiceParam("meter_refresh","Meter Refresh",{"10 Hz","24 Hz"},1));
+        auto refresh=mpc::choiceParam("meter_refresh","Meter Refresh",{"10 Hz","24 Hz"},1);refresh.automatable=false;addParam(refresh); // Legacy state only; fixed 24 Hz.
+        // Keep shipped IDs, ranges and defaults. These cosmetic readouts now
+        // Output selects two center textures; Buffer phase is now inert.
+        auto bt=mpc::intParam("buffer_texture_phase","Buffer Texture",0,5,3);bt.automatable=false;addParam(bt);
+        auto ot=mpc::intParam("output_texture_phase","Output Texture",0,5,0);ot.automatable=false;addParam(ot);
         receiver.contentDirectory=mpc::detail::computePluginFolder()+"/Content";
         receiver.onStatus=[this](const airlink::Status& s){std::lock_guard<std::mutex> lock(latestMutex); latestStatus=s;};
         receiver.mode.store(getInt(ReceiveMode)==1?1:2);receiver.latencyMs.store(int(get(Latency)));
@@ -102,8 +116,9 @@ public:
                 }
                 now=Clock::now();
                 if(now>=nextMeter){
+                    updateTextures();
                     updateMeters(std::chrono::duration<double>(now-lastMeter).count());lastMeter=now;
-                    auto period=getInt(MeterRefresh)==0?std::chrono::nanoseconds(100000000):std::chrono::nanoseconds(41666667);
+                    auto period=std::chrono::nanoseconds(41666667); // Fixed 24 Hz; legacy saved values are ignored.
                     nextMeter+=period;auto after=Clock::now();if(nextMeter<=after)nextMeter=after+period;
                 }
                 std::this_thread::sleep_until(std::min(nextStatus,nextMeter));
@@ -124,13 +139,13 @@ public:
         if(index==ReceiveMode){int source=int(std::lround(value))==1?1:0;receiver.mode.store(source?1:2);syncing=true;if(getInt(SourceMode)!=source)set(SourceMode,float(source));syncing=false;}
         if(index==SourceMode){int source=int(std::lround(value));receiver.mode.store(source?1:2);syncing=true;if((getInt(ReceiveMode)==1?1:0)!=source)set(ReceiveMode,source?1.f:2.f);syncing=false;}
         if(index==Latency)receiver.latencyMs.store(std::clamp(int(std::lround(value)),10,150));
+
     }
     void process(mpc::ProcessContext& ctx) override {
         auto epoch=receiver.epoch.load(std::memory_order_acquire);
         if(epoch!=seenEpoch) { receiver.ring.discard(); renderer.rebuffer(); seenEpoch=epoch; }
         if(ctx.numOutputs<2) return;
-        float latency=get(Latency);
-        if(receiver.activeSource.load(std::memory_order_acquire)==2) latency=std::max(latency,120.f);
+        float latency=float(airlink::playbackBufferMs(receiver.activeSource.load(std::memory_order_acquire),getInt(Latency)));
         renderer.render(receiver.ring,ctx.outputs[0],ctx.outputs[1],ctx.numFrames,int(latency*sampleRate/1000),std::pow(10.f,get(Gain)/20),true,int(sampleRate));
     }
     bool formatValue(int index,float value,std::string& out) override {

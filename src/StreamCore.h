@@ -10,6 +10,10 @@ namespace airlink {
 static_assert(std::atomic<uint32_t>::is_always_lock_free, "SPSC requires lock-free 32-bit atomics");
 static_assert(std::atomic<float>::is_always_lock_free, "Meters require lock-free floats");
 struct Stereo { float l=0, r=0; };
+// Source 2 is AirPlay. Its receiver prebuffer is fixed; the UI setting is VBAN-only.
+inline int playbackBufferMs(int source,int vbanMs) {
+    return source==2?120:std::clamp(vbanMs,10,150);
+}
 template<uint32_t N> class Ring {
     static_assert((N & (N-1)) == 0, "power of two");
     std::array<Stereo,N> data{};

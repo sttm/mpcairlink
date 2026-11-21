@@ -29,18 +29,18 @@ PASS AirPlay-sized bursts preserved; 6 simulated minutes with jitter and +/-1000
 ./build/listening_soak
 PASS 10 simulated minutes: VBAN 256 frames, 48k->44.1k, 0.999 sender clock, +/-1.5ms jitter, zero overflow/trim/underrun
 PASS 10 simulated minutes: VBAN 256 frames, 48k->44.1k, 1.001 sender clock, +/-1.5ms jitter, zero overflow/trim/underrun
-20 simulated minutes completed in 0.830074 wall seconds; this is not a real-network soak
+20 simulated minutes completed in 0.758188 wall seconds; this is not a real-network soak
 ./build/vban_queue_test
 PASS VBAN reorder, uint32 wrap, duplicates, gap deadline, time-preserving concealment, bounded restart, idle
 ./build/vban_loss_test
 Loss test: missing=6 expected=6 overflow=0 trim=0 underruns=0
 PASS real UDP: 256-frame VBAN, reorder+duplicates+1% loss, preserved timeline, zero FIFO drops/underruns
 ./build/network_test
-UDP measurements: meanSquare=0.124232 stereoError=0 Hz=1000.98
+UDP measurements: meanSquare=0.124213 stereoError=0 Hz=1000.98
 PASS UDP loopback: PCM16 stereo 48k->44.1k, pitch=1000.98 Hz, timeout, ANY-only sender lock, PCM24 mono, float32, sequence wrap/loss/duplicates, host-rate change
 ./build/eco_ui_test
-Measured idle meter sampling: 24.4583 Hz / 9.99894 Hz; no notifications for unchanged blocks
-PASS idle zero UI notifications; 24 Hz target, changing-meter callbacks over 2.32s: 43/43; continuous UDP audio under slow UI host, no UI calls from audio thread
+Measured idle meter sampling: 24.5329 Hz / 23.5701 Hz (legacy rate value ignored); no notifications for unchanged blocks
+PASS idle zero UI notifications; 24 Hz target, changing-meter callbacks over 2.32s: 38/37; continuous UDP audio plus knob movement under slow UI host, no UI calls from audio thread
 ./build/host_sim build/native/mpcairlink.so dump > build/params.json
 ./build/host_sim build/native/mpcairlink.so test --seconds 1 --wav build/host-test.wav > build/host-test.log 2>&1
 cat build/host-test.log
@@ -50,7 +50,7 @@ host_sim: testing build/native/mpcairlink.so
 == Load (MPC sequence) ==
 PASS  load: library opened and VSTPluginMain found
 PASS  AEffect: magic 'VstP', resvd2 == 0, object != NULL
-INFO  uid 'ArLk' (1098009707)  version 1110  flags 0x130  instrument  0 in / 2 out  16 params  1 programs  chunks
+INFO  uid 'ArLk' (1098009707)  version 1300  flags 0x130  instrument  0 in / 2 out  18 params  1 programs  chunks
 PASS  MPC load sequence: "MPC AirLink" by "sttm", instrument, 1 program(s), first program "Default"
 
 == Prepare ==
@@ -71,8 +71,8 @@ INFO  1 parameter(s) hold a quantised value after the sweep
 PASS  parameter sweep: audio stayed finite while parameters changed
 
 == Check 3: state round-trip (effGetChunk -> randomise -> effSetChunk) ==
-INFO  state chunk is 311 bytes
-PASS  state round-trip: all 16 parameters restored from the chunk
+INFO  state chunk is 369 bytes
+PASS  state round-trip: all 18 parameters restored from the chunk
 PASS  state round-trip: re-saved chunk is byte-identical
 PASS  effSetChunk tolerated invalid data without crashing (returned 0)
 
@@ -85,8 +85,8 @@ PASS  no clipping in the main pass (peak -200.00 dBFS)
 PASS  no denormals in the main pass
 
 == Check 6: timing ==
-INFO  block of 128 frames = 2.90 ms; processReplacing took on average 0.12% of that, worst block 17.53% (desktop CPU, for orientation only)
-PASS  timing: average 0.12% CPU per block
+INFO  block of 128 frames = 2.90 ms; processReplacing took on average 0.30% of that, worst block 79.61% (desktop CPU, for orientation only)
+PASS  timing: average 0.30% CPU per block
 
 == Host callbacks seen ==
 INFO  audioMasterGetTime 1463, Automate 7, UpdateDisplay 0, IOChanged 0, ProcessEvents 0 calls (0 MIDI events out)
@@ -105,12 +105,14 @@ cat build/airplay-alac-test.log
 AirPlay status: AirPlay: MPC AirLink connection: RECEIVING source: AirPlay
 Encrypted ALAC: PASS real VST2 AirPlay: mDNS discovery, RTSP OPTIONS/ANNOUNCE/SETUP/RECORD, NTP/RTP PCM audio, source status, reconnect OPTIONS after teardown, VBAN stops service
 python3 tools/make_skin.py
-MPC AirLink terminal skin generated: /work/skins
+Physical AirLink skin generated: /work/release/source/mpcairlink/skins decoded RGBA MiB: 8.99
+python3 tests/skin_contract_test.py
+PASS layered skin: VBAN-only address/port, mode cards, native fonts/Q-Links; shared rotor, fixed light, two center frames, no Focus overlay; 8.99 MiB decoded artwork
 ./build/host_sim build/native/mpcairlink.so dump > build/params.json
 python3 tools/package.py
 PASS AirPlay arm32 ELF architecture, dependencies resolved inside bundle/system libc, GLIBC <= 2.39
 PASS AirPlay arm64 ELF architecture, dependencies resolved inside bundle/system libc, GLIBC <= 2.39
-Validating /work/build/VST2 Plugins/sttm - VST - MPC AirLink
+Validating /work/release/source/mpcairlink/build/VST2 Plugins/sttm - VST - MPC AirLink
 OK     plugin.json: MPC AirLink by sttm (instrument, uid ArLk)
 OK     folder name "sttm - VST - MPC AirLink"
 OK     file32: mpcairlink-arm32.so is a 32-bit ARM shared object
@@ -127,38 +129,26 @@ OK     manufacturer matches the binary (sttm)
 OK     kind matches the binary (instrument)
 OK     numInputs matches the binary (0)
 OK     numOutputs matches the binary (2)
-OK     TUI.json: all parameter handles are within 0..15
+OK     TUI.json: all parameter handles are within 0..17
 OK     TUI.json: image AirPlay_off.png present
 OK     TUI.json: image AirPlay_on.png present
 OK     TUI.json: image VBAN_off.png present
 OK     TUI.json: image VBAN_on.png present
-OK     TUI.json: image airplay-card.png present
-OK     TUI.json: image refresh10_off.png present
-OK     TUI.json: image refresh10_on.png present
-OK     TUI.json: image refresh24_off.png present
-OK     TUI.json: image refresh24_on.png present
-OK     TUI.json: image terminal-diagnostics.png present
-OK     TUI.json: image terminal-meter-strip.png present
-OK     TUI.json: image terminal-panel.png present
-OK     TUI.json: image terminal-slider.png present
+OK     TUI.json: image airplay-display.png present
+OK     TUI.json: image airplay-hint.png present
+OK     TUI.json: image buffer-setting-touch.png present
+OK     TUI.json: image meter-strip.png present
+OK     TUI.json: image output-base.png present
+OK     TUI.json: image output-center.png present
+OK     TUI.json: image output-light.png present
+OK     TUI.json: image output-touch.png present
+OK     TUI.json: image physical-diagnostics.png present
+OK     TUI.json: image physical-panel.png present
+OK     TUI.json: image vban-display.png present
 OK     TUI.json: 2 tabs
 OK     Q-Links.json: 2 tab maps, all values in range
 OK     version.xml uiversion 0.1.0.0
 OK     Content/: 23 files, 9.3 MB (loaded by the plugin at run time, see framework/mpc_resources.h)
 0 errors, 0 warnings
-Package: /work/dist/mpcairlink-1.1.1-mpc.zip 
-SHA256: 5064281fe09a86bf4b5208a0c15e3e60a9609ddd7be43afd52de30745950ffc6
-g++ -std=c++17 -O2 -Wall -Wextra -Werror -pthread -isystem vendor/mpc-plugin-builder-sdk/framework -Isrc -O1 -g -fsanitize=address,undefined tests/core_test.cpp -o build/core_sanitize
-./build/core_sanitize
-PASS parser (PCM16/24/float/NaN/malformed/rates), million-frame concurrent SPSC, rate conversion, prebuffer/fades
-g++ -std=c++17 -O2 -Wall -Wextra -Werror -pthread -isystem vendor/mpc-plugin-builder-sdk/framework -Isrc -O1 -g -fsanitize=address,undefined tests/network_test.cpp src/Receiver.cpp src/AirPlayProcess.cpp -o build/network_sanitize
-./build/network_sanitize
-UDP measurements: meanSquare=0.124227 stereoError=0 Hz=1000.98
-PASS UDP loopback: PCM16 stereo 48k->44.1k, pitch=1000.98 Hz, timeout, ANY-only sender lock, PCM24 mono, float32, sequence wrap/loss/duplicates, host-rate change
-g++ -std=c++17 -O2 -Wall -Wextra -Werror -pthread -isystem vendor/mpc-plugin-builder-sdk/framework -Isrc -O1 -g -fsanitize=address,undefined tests/vban_queue_test.cpp -o build/vban_queue_sanitize
-./build/vban_queue_sanitize
-PASS VBAN reorder, uint32 wrap, duplicates, gap deadline, time-preserving concealment, bounded restart, idle
-g++ -std=c++17 -O2 -Wall -Wextra -Werror -pthread -isystem vendor/mpc-plugin-builder-sdk/framework -Isrc -O1 -g -fsanitize=address,undefined tests/vban_loss_test.cpp src/Receiver.cpp src/AirPlayProcess.cpp -o build/vban_loss_sanitize
-./build/vban_loss_sanitize
-Loss test: missing=6 expected=6 overflow=0 trim=0 underruns=0
-PASS real UDP: 256-frame VBAN, reorder+duplicates+1% loss, preserved timeline, zero FIFO drops/underruns
+Package: /work/release/source/mpcairlink/dist/mpcairlink-1.3.0-mpc.zip
+SHA256: 3a3b4913b6cc9d018f74246d77409cf78b613057094dcc95cdcb86364e38edef

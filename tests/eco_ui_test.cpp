@@ -8,28 +8,34 @@ static std::atomic<unsigned> meterSamples{0};
 #include <unistd.h>
 #include <cassert>
 #include <iostream>
-static std::array<std::atomic<unsigned>,16> calls{};
+static std::array<std::atomic<unsigned>,18> calls{};
 static std::atomic<unsigned> total{0},audioNotifications{0};
 static std::thread::id audioThread;
 static VstIntPtr host(AEffect*,VstInt32 op,VstInt32 index,VstIntPtr,void*,float){
  if(op==audioMasterVersion)return 2400;
- if(op==audioMasterAutomate){++total;if(index>=0&&index<16)++calls[index];if(std::this_thread::get_id()==audioThread)++audioNotifications;std::this_thread::sleep_for(std::chrono::milliseconds(8));}
+ if(op==audioMasterAutomate){++total;if(index>=0&&index<18)++calls[index];if(std::this_thread::get_id()==audioThread)++audioNotifications;std::this_thread::sleep_for(std::chrono::milliseconds(8));}
  return 0;
 }
 int main(){
- audioThread=std::this_thread::get_id();AEffect* fx=VSTPluginMain(host);assert(fx&&fx->numParams==16);
+ audioThread=std::this_thread::get_id();AEffect* fx=VSTPluginMain(host);assert(fx&&fx->numParams==18);
  fx->dispatcher(fx,effOpen,0,0,nullptr,0);fx->dispatcher(fx,effSetSampleRate,0,0,nullptr,44100);fx->dispatcher(fx,effSetBlockSize,0,128,nullptr,0);
+ // Layer animation must not quantize the real VST control values.
+ fx->setParameter(fx,16,.4f);fx->setParameter(fx,17,.8f);
+ for(int control:{2,3})for(int n=0;n<127;++n){float value=n/126.f;fx->setParameter(fx,control,value);
+  assert(std::fabs(fx->getParameter(fx,control)-value)<1e-6f);}
+
+ fx->setParameter(fx,3,24.f/36);
  assert(fx->getParameter(fx,14)==0); // AirPlay default; public selector has two options.
  fx->setParameter(fx,14,1);fx->setParameter(fx,2,1);fx->dispatcher(fx,effMainsChanged,0,1,nullptr,0);
- std::this_thread::sleep_for(std::chrono::milliseconds(1400));total=0;
+ std::this_thread::sleep_for(std::chrono::milliseconds(1400));assert(std::fabs(fx->getParameter(fx,16)-.4f)<1e-6f&&fx->getParameter(fx,17)==0);total=0;
  auto idleStart=std::chrono::steady_clock::now();auto idleSamples=meterSamples.load();
  std::this_thread::sleep_for(std::chrono::milliseconds(1100));assert(total.load()==0);
  double hz24=(meterSamples.load()-idleSamples)/std::chrono::duration<double>(std::chrono::steady_clock::now()-idleStart).count();assert(hz24>=22&&hz24<=26);
  fx->setParameter(fx,15,0);std::this_thread::sleep_for(std::chrono::milliseconds(250));
  idleStart=std::chrono::steady_clock::now();idleSamples=meterSamples.load();std::this_thread::sleep_for(std::chrono::milliseconds(1100));
- double hz10=(meterSamples.load()-idleSamples)/std::chrono::duration<double>(std::chrono::steady_clock::now()-idleStart).count();assert(hz10>=9&&hz10<=11);
+ double hzLegacy=(meterSamples.load()-idleSamples)/std::chrono::duration<double>(std::chrono::steady_clock::now()-idleStart).count();assert(hzLegacy>=22&&hzLegacy<=26);
  fx->setParameter(fx,15,1);std::this_thread::sleep_for(std::chrono::milliseconds(200));
- std::cout<<"Measured idle meter sampling: "<<hz24<<" Hz / "<<hz10<<" Hz; no notifications for unchanged blocks\n";
+ std::cout<<"Measured idle meter sampling: "<<hz24<<" Hz / "<<hzLegacy<<" Hz (legacy rate value ignored); no notifications for unchanged blocks\n";
  int sock=socket(AF_INET,SOCK_DGRAM,0);assert(sock>=0);sockaddr_in to{};to.sin_family=AF_INET;to.sin_port=htons(6980);inet_pton(AF_INET,"127.0.0.1",&to.sin_addr);
  std::atomic<bool> sending{true};
  std::thread sender([&]{auto next=std::chrono::steady_clock::now();uint32_t sequence=0;while(sending.load()){
@@ -42,10 +48,11 @@ int main(){
  }});
  for(auto& c:calls){c=0;}
  float l[128]{},r[128]{};float* output[]={l,r};double energy=0;auto next=std::chrono::steady_clock::now();
- for(int block=0;block<800;++block){fx->processReplacing(fx,nullptr,output,128);for(int j=0;j<128;++j){assert(std::isfinite(l[j])&&std::isfinite(r[j]));if(block>100)energy+=l[j]*l[j];}next+=std::chrono::nanoseconds(2902494);std::this_thread::sleep_until(next);}
+ for(int block=0;block<800;++block){if(block%10==0)fx->setParameter(fx,3,.60f+(block%100)*.001f);fx->processReplacing(fx,nullptr,output,128);for(int j=0;j<128;++j){assert(std::isfinite(l[j])&&std::isfinite(r[j]));if(block>100)energy+=l[j]*l[j];}next+=std::chrono::nanoseconds(2902494);std::this_thread::sleep_until(next);}
  sending=false;sender.join();close(sock);assert(energy>100);
  assert(fx->getParameter(fx,11)==0&&fx->getParameter(fx,12)==0);
+ assert(calls[17].load()>0&&calls[17].load()<=58&&calls[16].load()==0);
  assert(calls[9].load()>=24&&calls[10].load()>=24&&calls[9].load()<=58&&calls[10].load()<=58&&audioNotifications.load()==0);
- std::cout<<"PASS idle zero UI notifications; 24 Hz target, changing-meter callbacks over 2.32s: "<<calls[9]<<"/"<<calls[10]<<"; continuous UDP audio under slow UI host, no UI calls from audio thread\n";
+ std::cout<<"PASS idle zero UI notifications; 24 Hz target, changing-meter callbacks over 2.32s: "<<calls[9]<<"/"<<calls[10]<<"; continuous UDP audio plus knob movement under slow UI host, no UI calls from audio thread\n";
  fx->dispatcher(fx,effMainsChanged,0,0,nullptr,0);fx->dispatcher(fx,effClose,0,0,nullptr,0);
 }

@@ -8,12 +8,21 @@
 #include <vector>
 using namespace std::chrono_literals;
 int main() {
-    MPCAirLink plugin; assert(plugin.getInt(SourceMode)==0&&plugin.getInt(ReceiveMode)==2);
+    MPCAirLink plugin; assert(plugin.getInt(Latency)==120); assert(plugin.getInt(SourceMode)==0&&plugin.getInt(ReceiveMode)==2);
     plugin.set(SourceMode,1);assert(plugin.getInt(ReceiveMode)==1);plugin.set(SourceMode,0);assert(plugin.getInt(ReceiveMode)==2);plugin.set(ReceiveMode,0);assert(plugin.getInt(SourceMode)==0);plugin.set(ReceiveMode,1); plugin.prepare(44100,512); plugin.set(Latency,40);
     assert(std::string(plugin.info().name)=="MPC AirLink");
     assert(plugin.info().uniqueId==MPC_FOURCC('A','r','L','k'));
-    assert(plugin.numParams()==16 && plugin.param(1).id=="receive_mode");
+    assert(plugin.numParams()==18 && plugin.param(1).id=="receive_mode");
     for(int i=0;i<plugin.numParams();++i) assert(plugin.param(i).id!="stream_filter");
+    // Old 16-parameter projects load with the original IDs/ranges intact.
+    {auto state=plugin.internalSaveState();assert(state.size()>12&&state[4]==2);
+     size_t at=12,cut=0;for(int n=0;n<18;++n){unsigned length=state[at];at+=1+length+8;if(n==15)cut=at;}
+     std::vector<uint8_t> legacy(state.begin(),state.begin()+cut);legacy[8]=16;legacy[9]=legacy[10]=legacy[11]=0;
+     legacy.insert(legacy.end(),state.begin()+at,state.end());
+     plugin.set(Latency,150);plugin.set(Gain,12);assert(plugin.internalLoadState(legacy.data(),legacy.size()));
+     assert(plugin.getInt(Latency)==40&&std::fabs(plugin.get(Gain))<1e-5);
+     assert(plugin.param(BufferTexture).id=="buffer_texture_phase"&&plugin.param(OutputTexture).id=="output_texture_phase");
+    }
     int sock=socket(AF_INET,SOCK_DGRAM,0); assert(sock>=0);
     sockaddr_in dest{}; dest.sin_family=AF_INET; dest.sin_port=htons(6980); inet_pton(AF_INET,"127.0.0.1",&dest.sin_addr);
     std::this_thread::sleep_for(100ms);

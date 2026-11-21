@@ -1,73 +1,53 @@
-# MPC AirLink
+# MPC AirLink 1.3.0
 
-VBAN and AirPlay audio receiver for Akai MPC Standalone. A native VST2 instrument by **sttm**, with a dark, low-resource card interface and stereo output on its plugin track.
+Classic AirPlay / VBAN audio receiver for Akai MPC Standalone. Native VST2 instrument by **sttm**, with stereo output on its plugin track.
 
-![Generated interface preview, not a hardware screenshot](docs/ui-preview.png)
+![Generated UI preview; not a hardware screenshot](docs/ui-preview.png)
 
 [Русская инструкция](README.ru.md) · [Validation](docs/VALIDATION.md) · [Third-party notices](THIRD_PARTY.md)
 
-## Install — MPC OS 3.10.1 or later
+## Install
 
-Download **mpcairlink-1.1.1-mpc.zip** from [Releases](https://github.com/sttm/mpcairlink/releases).
-Extract it into the root of an SD card or USB drive. Keep this folder intact:
+Requires **MPC OS 3.10.1+**. Download `mpcairlink-1.3.0-mpc.zip` from [Releases](https://github.com/sttm/mpcairlink/releases/tag/v1.3.0), extract to SD/USB root and keep this complete folder:
 
-```
-VST2 Plugins/sttm - VST - MPC AirLink/
-```
+`VST2 Plugins/sttm - VST - MPC AirLink/`
 
-On the MPC, enable **Preferences → Enhancements (Beta) → Enable Enhancements** and **External Plugin Support**, then restart. Create a Plugin track and select **External Plugins → sttm → MPC AirLink**. Route the track to Main Out and leave the drive connected. No MIDI notes or sequencer playback required.
+Enable Preferences → Enhancements (Beta) → Enable Enhancements and External Plugin Support, then restart MPC. Load External Plugins → sttm → MPC AirLink on a Plugin track and route it to the desired output. Leave the drive connected. MIDI notes and sequencer playback are not needed. The combined ZIP includes ARMv7 (Gen1) and AArch64 (Gen2); separate per-CPU catalog ZIPs are also published.
 
-The combined USB package includes ARMv7 hard-float (Gen1) and AArch64 (Gen2). Separate per-CPU catalog packages are also supplied for Open MPC's installer. This release requires OS 3.10.1+, including when using those packages.
+## Listen
 
-## Receive audio
+- **Mac / iPhone:** join the same local network, leave AirPlay selected and choose **MPC AirLink** in the sender's AirPlay audio menu. This is classic RAOP audio, not screen mirroring or AirPlay 2. Normal AirPlay protocol latency still applies.
+- **Windows / Android / other VBAN senders:** choose VBAN. Send to the displayed MPC IPv4 address, UDP 6980. Any stream name is accepted; PCM16/24 or float32, mono/stereo are supported. Prefer 44.1/48 kHz and 256 frames per packet. VBAN Talkie sends its microphone input and needs microphone/local-network permission.
+- **Q-Link 1:** Output Gain only, -24 to +12 dB, default 0 dB. Positive gain can clip. Source selection and the single volume knob also work by touch; drag the knob vertically.
+- **DIAG → VBAN Buffer:** 10–150 ms, default **120 ms for new instances**. Saved projects retain their previous setting. AirPlay has a fixed 120 ms internal prebuffer independent of this field; this does not replace its protocol buffering.
+- Meter sampling targets **24 Hz**, with unchanged values suppressed. There is no refresh-rate selector. This is not a guarantee of host screen FPS.
+- No AUTO mode. One active sender/source and one instance per MPC; multiple instances contend for network ports.
 
-- **iPhone / Mac:** join the same LAN, leave AirPlay selected (the default), then select **MPC AirLink** in the sender's AirPlay audio menu. This is classic AirPlay 1 / RAOP audio, not screen mirroring or AirPlay 2. Its normal latency is about two seconds.
-- **VBAN:** choose VBAN. Send audio to the IPv4 address shown on the plugin, UDP **6980**, PCM16/24 or float32, mono/stereo. Any stream name is accepted. Prefer 44.1/48 kHz and **256 frames per packet**. Start with jitter 150 ms on Wi-Fi.
-- **VBAN Talkie:** TX destination = MPC IP, port 6980, name Stream1 (any name works), PCM16, 48 kHz, mono or stereo. Enable microphone/local-network permissions and transmission. Talkie sends its microphone input.
-- AUTO has been removed. Old saved AUTO values map to AirPlay. One active source is received at a time; use one plugin instance per MPC.
+The physical-style skin uses one rotating grip/index image, fixed lighting and two subtle center textures. No green knob focus box or orange Q-Link bank boundary is drawn. Decoded PNG artwork is approximately 9 MiB, excluding host caches/RSS. Runtime rotation can cost more CPU than a filmstrip; repeated teeth can visually alias during fast movement.
 
-Q-Link 1/2/3 control source, jitter (10–150 ms, default 40), and gain (−24…+12 dB, default 0). STREAM shows the AirPlay receiver name or VBAN address, receive status, format and meters; DIAG shows packet loss, FIFO drops and underruns. AirPlay uses at least 120 ms of local buffering in addition to protocol latency.
+VBAN includes jitter buffering, reordering, loss concealment, linear sample-rate conversion and a small FIFO clock correction. It is not a bandlimited converter and cannot recover arbitrary Wi-Fi outages. AirPlay requires mDNS multicast and permitted peer-to-peer traffic on the LAN. The previous iPhone album-end reconnection report is not claimed fixed.
 
-VBAN resampling follows source and host rates with linear interpolation and a small FIFO clock correction. It is not a bandlimited converter. Network gaps exceeding the buffer still cause interruptions; use a reliable LAN without client isolation. Multicast mDNS discovery must be allowed for AirPlay.
+## Build
 
-## Build from source
-
-With Docker Desktop running on macOS (or Docker on Linux):
+With Docker Desktop running on macOS, or Docker on Linux:
 
 ```sh
 ./build.sh
-```
-
-This uses a Debian bookworm linux/amd64 container and `arm-linux-gnueabihf-g++` / `aarch64-linux-gnu-g++`, builds both VST binaries and bundled Shairport Sync helpers, runs native tests, generates the skin, validates the folder and packages the USB ZIP. First build needs network access to Debian and Docker Hub. Outputs are in `build/VST2 Plugins/` and `dist/`.
-
-```sh
 ./build.sh test
 ./build.sh airplay-test
 ./build.sh sanitize
 ```
 
-Core/parser/SPSC/SRC, actual UDP loss/reordering, VST host, RTSP/RTP PCM and encrypted ALAC are tested. User confirmed **v1.0.0** on **MPC Key 61 / OS 3.10.1**, 2026-11-16; tested.json retains that historical version. **The v1.1.1 UI and actual display FPS have not yet been tested on MPC hardware.** **Gen2 is cross-compiled and ELF-validated only; no physical Gen2 test is claimed.** Long-duration and all host workflows still need broader testing.
+The Debian bookworm linux/amd64 container uses arm-linux-gnueabihf-g++ and aarch64-linux-gnu-g++, builds both VSTs and bundled helpers, runs native tests, generates the skin and validates/packages the result. First build needs network access. Outputs: `build/VST2 Plugins/` and `dist/`. Blender and image generation are not build dependencies; source artwork is included.
 
-## Implementation and licences
+Native tests cover parser/SPSC/SRC, UDP reordering/loss/jitter, state compatibility, fixed 24 Hz scheduling and audio while Gain changes under slow UI callbacks. Classic AirPlay PCM/encrypted ALAC loopback passed for the unchanged receiver path in 1.2.5. Version 1.3.0 changes only version metadata and the Q-Link bank outline from 1.2.5; its native/ARM builds, regression tests and skin checks passed.
 
-C++17, POSIX sockets, one network worker and a lock-free stereo SPSC FIFO. No allocation, locks or I/O in the audio callback. AirPlay runs an isolated bundled Shairport Sync 4.3.7 process with TinySVCmDNS; no Avahi/D-Bus/system service or firmware modification. Helper libraries are loaded only in that child process. Temporary helper files use a private `/tmp` directory and are cleaned up on unload.
+Historical `tested.json` records v1.0.0 on MPC Key 61 / OS 3.10.1. User feedback also confirmed the touch fix in 1.2.4. **The final 1.3.0 bank-outline change and physical Gen2 remain unverified on hardware.** Device CPU, long sessions and all network conditions are not certified.
 
-First-party code and the vendored inMusic SDK are MIT. Shairport/ALAC are MIT, TinySVCmDNS BSD-3-Clause, OpenSSL Apache-2.0, libconfig LGPL-2.1-or-later and libpopt MIT. Static captions use Space Grotesk (OFL-1.1); the original AIRLINK wordmark is generated from geometric paths. No font binaries ship in the plugin ZIP. Font/artwork notices remain in the repo and packages; live text uses the MPC host's font. Full notices and corresponding libconfig source accompany the binaries. See [THIRD_PARTY.md](THIRD_PARTY.md).
+## Implementation and licensing
 
-Plugin ID **mpcairlink**, VST UID **ArLk**. Earlier local MPC StreamIn builds have a different identity; replace old project slots manually. This is an independent community plugin, not an Akai, Apple or VB-Audio product.
+C++17 / Linux POSIX. A network worker feeds a lock-free stereo SPSC; the audio callback performs no allocation, mutex, file/socket I/O or host UI notifications. Classic AirPlay runs bundled Shairport Sync 4.3.7 with TinySVCmDNS in a child process, without Avahi/D-Bus/ALSA services or firmware changes. A private temporary helper directory is cleaned on unload; see [network/helper lifecycle](docs/NETWORK-AND-HELPER.md).
 
-## Version 1.1.1
+Project code is MIT. Distributed code also includes BSD-3-Clause, Apache-2.0 and LGPL-2.1-or-later components. Both helpers are byte-identical to the audited classic-only 1.1.1 builds; [licence audit](docs/LICENSE-AUDIT.json) documents disabled AirPlay-2 and convolution components. Source, notices and LGPL corresponding source are included/published. Font and CC0 icon notices remain in the repo/package; no font binaries ship in the plugin ZIP.
 
-AirPlay is the default source; the public source selector has only AirPlay and VBAN.
-The first 14 parameter IDs remain stable; Source (14) and Meter Refresh (15) are appended.
-The display worker samples meters at a target 24 Hz (DIAG offers 10 Hz), with 120 ms
-release and 22 complete LED blocks per channel. Unchanged levels/statuses send no
-host event. Status polling runs separately at up to 10 Hz; no host UI callbacks run
-in the audio or receive path. The measured timer cadence is not a claim about MPC
-compositor FPS. Rounded cards and icons are static PNGs, not runtime vector effects.
-
-Track-title metadata, cover art and AirPlay 2 remain disabled. A successful RTSP
-OPTIONS after teardown is tested; full iPhone reconnect/album-end behaviour and
-long-duration physical Wi-Fi playback still need device testing. If an iPhone
-cannot reconnect, try VBAN → AirPlay to restart discovery/service. This release
-does not claim a confirmed fix for that previously reported iPhone issue.
+UID **ArLk**, plugin ID **mpcairlink** and all historical parameter IDs/order remain stable. Legacy parameters needed for saved state remain present even when their former UI controls have been removed.

@@ -61,6 +61,7 @@ airplay-test: build/native/mpcairlink.so
 	cat build/airplay-alac-test.log
 skin:
 	python3 tools/make_skin.py
+	python3 tests/skin_contract_test.py
 package: skin build/host_sim build/native/mpcairlink.so
 	./build/host_sim build/native/mpcairlink.so dump > build/params.json
 	python3 tools/package.py

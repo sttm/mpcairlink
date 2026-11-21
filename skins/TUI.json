@@ -6,7 +6,7 @@
             "importFiles": [],
             "localComponentDefinitions": [
                 {
-                    "key": "terminal fader",
+                    "key": "output control",
                     "value": {
                         "version": 2,
                         "actions": [
@@ -22,14 +22,14 @@
                                 "onAction": "Double Click",
                                 "handler": "Show Overlay",
                                 "handleName": "Data",
-                                "additionalData": "terminal editor"
+                                "additionalData": "hardware editor"
                             },
                             {
                                 "version": 1,
                                 "onAction": "Enter Pressed",
                                 "handler": "Show Overlay",
                                 "handleName": "Data",
-                                "additionalData": "terminal editor"
+                                "additionalData": "hardware editor"
                             }
                         ],
                         "backgroundData": {
@@ -52,14 +52,13 @@
                                 "version": 2,
                                 "componentData": {
                                     "version": 1,
-                                    "name": "focus",
-                                    "type": "Focus",
+                                    "name": "static body",
+                                    "type": "Image",
                                     "data": {
-                                        "version": 1,
-                                        "backgroundColour": "19ffffff",
-                                        "outlineColour": "ff8fe07a",
-                                        "backgroundInset": 4.0,
-                                        "outlineThickness": 1.0
+                                        "version": 2,
+                                        "imageType": "Regular",
+                                        "colour": "00000000",
+                                        "image": "output-base.png"
                                     }
                                 },
                                 "handle remapping": {
@@ -70,24 +69,53 @@
                                     "version": 1,
                                     "acceptsHWFocus": "No",
                                     "showWhenDataModelInvalid": "Show",
-                                    "whenVisible": "WhenFocussed",
+                                    "whenVisible": "Always",
                                     "boundsType": "Absolute",
-                                    "bounds": "0 0 380 116"
+                                    "bounds": "0 0 184 184"
                                 }
                             },
                             {
                                 "version": 2,
                                 "componentData": {
                                     "version": 1,
-                                    "name": "rail",
+                                    "name": "center texture",
+                                    "type": "Image",
+                                    "data": {
+                                        "version": 2,
+                                        "imageType": "FilmStrip",
+                                        "colour": "00000000",
+                                        "image": "output-center.png",
+                                        "numFrames": 2,
+                                        "handleName": "Phase",
+                                        "animated": false
+                                    }
+                                },
+                                "handle remapping": {
+                                    "version": 1,
+                                    "map": []
+                                },
+                                "bounds": {
+                                    "version": 1,
+                                    "acceptsHWFocus": "No",
+                                    "showWhenDataModelInvalid": "Show",
+                                    "whenVisible": "Always",
+                                    "boundsType": "Absolute",
+                                    "bounds": "0 0 184 184"
+                                }
+                            },
+                            {
+                                "version": 2,
+                                "componentData": {
+                                    "version": 1,
+                                    "name": "rotor",
                                     "type": "Knob",
                                     "data": {
-                                        "version": 3,
-                                        "knobType": "FilmStrip",
-                                        "filmStrip": "terminal-slider.png",
-                                        "numFrames": 127,
-                                        "invert": false,
-                                        "dragOrientation": "Horizontal",
+                                        "version": 4,
+                                        "knobType": "RotatingImage",
+                                        "foregroundImage": "output-rotor.png",
+                                        "backgroundImage": "output-transparent.png",
+                                        "imageScale": 1.0,
+                                        "dragOrientation": "Vertical",
                                         "handleName": "Data"
                                     }
                                 },
@@ -101,14 +129,174 @@
                                     "showWhenDataModelInvalid": "Show",
                                     "whenVisible": "Always",
                                     "boundsType": "Absolute",
-                                    "bounds": "20 55 336 58"
+                                    "bounds": "0 0 184 184"
+                                }
+                            },
+                            {
+                                "version": 2,
+                                "componentData": {
+                                    "version": 1,
+                                    "name": "fixed lighting",
+                                    "type": "Image",
+                                    "data": {
+                                        "version": 2,
+                                        "imageType": "Regular",
+                                        "colour": "00000000",
+                                        "image": "output-light.png"
+                                    }
+                                },
+                                "handle remapping": {
+                                    "version": 1,
+                                    "map": []
+                                },
+                                "bounds": {
+                                    "version": 1,
+                                    "acceptsHWFocus": "No",
+                                    "showWhenDataModelInvalid": "Show",
+                                    "whenVisible": "Always",
+                                    "boundsType": "Absolute",
+                                    "bounds": "0 0 184 184"
+                                }
+                            },
+                            {
+                                "version": 2,
+                                "componentData": {
+                                    "version": 1,
+                                    "name": "touch gesture",
+                                    "type": "Knob",
+                                    "data": {
+                                        "version": 3,
+                                        "knobType": "FilmStrip",
+                                        "filmStrip": "output-touch.png",
+                                        "numFrames": 2,
+                                        "invert": false,
+                                        "dragOrientation": "Vertical",
+                                        "handleName": "Data"
+                                    }
+                                },
+                                "handle remapping": {
+                                    "version": 1,
+                                    "map": []
+                                },
+                                "bounds": {
+                                    "version": 1,
+                                    "acceptsHWFocus": "No",
+                                    "showWhenDataModelInvalid": "Show",
+                                    "whenVisible": "Always",
+                                    "boundsType": "Absolute",
+                                    "bounds": "0 0 184 184"
                                 }
                             }
                         ]
                     }
                 },
                 {
-                    "key": "terminal editor",
+                    "key": "buffer setting",
+                    "value": {
+                        "version": 2,
+                        "actions": [
+                            {
+                                "version": 1,
+                                "onAction": "Double Click",
+                                "handler": "Show Overlay",
+                                "handleName": "Data",
+                                "additionalData": "hardware editor"
+                            },
+                            {
+                                "version": 1,
+                                "onAction": "Enter Pressed",
+                                "handler": "Show Overlay",
+                                "handleName": "Data",
+                                "additionalData": "hardware editor"
+                            }
+                        ],
+                        "backgroundData": {
+                            "version": 1,
+                            "focussed": {
+                                "version": 1,
+                                "colour": "00000000",
+                                "image": ""
+                            },
+                            "unfocussed": {
+                                "version": 1,
+                                "colour": "00000000",
+                                "image": ""
+                            }
+                        },
+                        "ignoreMousePresses": false,
+                        "disableCoarseDataWheel": false,
+                        "componentsData": [
+                            {
+                                "version": 2,
+                                "componentData": {
+                                    "version": 1,
+                                    "name": "buffer ms",
+                                    "type": "Label",
+                                    "data": {
+                                        "version": 1,
+                                        "textStyle": {
+                                            "version": 1,
+                                            "font": {
+                                                "version": 1,
+                                                "name": "Roboto",
+                                                "style": "Regular",
+                                                "height": 27.0
+                                            },
+                                            "colour": "ff8fe07a",
+                                            "justification": "horizontallyCentred verticallyCentred",
+                                            "case": "Original"
+                                        },
+                                        "type": "Value",
+                                        "handleName": "Data"
+                                    }
+                                },
+                                "handle remapping": {
+                                    "version": 1,
+                                    "map": []
+                                },
+                                "bounds": {
+                                    "version": 1,
+                                    "acceptsHWFocus": "No",
+                                    "showWhenDataModelInvalid": "Show",
+                                    "whenVisible": "Always",
+                                    "boundsType": "Absolute",
+                                    "bounds": "0 0 220 48"
+                                }
+                            },
+                            {
+                                "version": 2,
+                                "componentData": {
+                                    "version": 1,
+                                    "name": "buffer touch",
+                                    "type": "Knob",
+                                    "data": {
+                                        "version": 3,
+                                        "knobType": "FilmStrip",
+                                        "filmStrip": "buffer-setting-touch.png",
+                                        "numFrames": 2,
+                                        "invert": false,
+                                        "dragOrientation": "Vertical",
+                                        "handleName": "Data"
+                                    }
+                                },
+                                "handle remapping": {
+                                    "version": 1,
+                                    "map": []
+                                },
+                                "bounds": {
+                                    "version": 1,
+                                    "acceptsHWFocus": "No",
+                                    "showWhenDataModelInvalid": "Show",
+                                    "whenVisible": "Always",
+                                    "boundsType": "Absolute",
+                                    "bounds": "0 0 220 48"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "hardware editor",
                     "value": {
                         "version": 2,
                         "actions": [],
@@ -205,13 +393,13 @@
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "terminal panel",
+                                "name": "physical panel",
                                 "type": "Image",
                                 "data": {
                                     "version": 2,
                                     "imageType": "Regular",
                                     "colour": "00000000",
-                                    "image": "terminal-panel.png"
+                                    "image": "physical-panel.png"
                                 }
                             },
                             "handle remapping": {
@@ -231,13 +419,13 @@
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "AirPlay receiver card",
+                                "name": "AirPlay receiver",
                                 "type": "Image",
                                 "data": {
                                     "version": 2,
                                     "imageType": "Regular",
                                     "colour": "00000000",
-                                    "image": "airplay-card.png"
+                                    "image": "airplay-display.png"
                                 }
                             },
                             "handle remapping": {
@@ -247,10 +435,10 @@
                             "bounds": {
                                 "version": 2,
                                 "acceptsHWFocus": "No",
-                                "showWhenDataModelInvalid": "Show",
+                                "showWhenDataModelInvalid": "Hide",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "40 100 746 134",
+                                "bounds": "350 150 525 118",
                                 "additionalInvalidatingHandles": [
                                     "IndexedEnabling/0/2/Parameter 14"
                                 ]
@@ -260,42 +448,26 @@
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "address",
-                                "type": "Label",
+                                "name": "VBAN receiver",
+                                "type": "Image",
                                 "data": {
-                                    "version": 1,
-                                    "textStyle": {
-                                        "version": 1,
-                                        "font": {
-                                            "version": 1,
-                                            "name": "Roboto",
-                                            "style": "Regular",
-                                            "height": 42.0
-                                        },
-                                        "colour": "ffe3eadf",
-                                        "justification": "left verticallyCentred",
-                                        "case": "Original"
-                                    },
-                                    "type": "Value",
-                                    "handleName": "Data"
+                                    "version": 2,
+                                    "imageType": "Regular",
+                                    "colour": "00000000",
+                                    "image": "vban-display.png"
                                 }
                             },
                             "handle remapping": {
                                 "version": 1,
-                                "map": [
-                                    {
-                                        "key": "Data",
-                                        "value": "Parameter 4"
-                                    }
-                                ]
+                                "map": []
                             },
                             "bounds": {
                                 "version": 2,
                                 "acceptsHWFocus": "No",
-                                "showWhenDataModelInvalid": "Show",
+                                "showWhenDataModelInvalid": "Hide",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "60 145 705 51",
+                                "bounds": "350 150 525 118",
                                 "additionalInvalidatingHandles": [
                                     "IndexedEnabling/1/2/Parameter 14"
                                 ]
@@ -315,7 +487,7 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 38.0
+                                            "height": 29.0
                                         },
                                         "colour": "ff8fe07a",
                                         "justification": "left verticallyCentred",
@@ -340,14 +512,14 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "825 151 390 49"
+                                "bounds": "68 198 255 45"
                             }
                         },
                         {
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "stream",
+                                "name": "VBAN IP and port",
                                 "type": "Label",
                                 "data": {
                                     "version": 1,
@@ -357,9 +529,54 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 30.0
+                                            "height": 32.0
                                         },
-                                        "colour": "ffe3eadf",
+                                        "colour": "ff8fe07a",
+                                        "justification": "left verticallyCentred",
+                                        "case": "Original"
+                                    },
+                                    "type": "Value",
+                                    "handleName": "Data"
+                                }
+                            },
+                            "handle remapping": {
+                                "version": 1,
+                                "map": [
+                                    {
+                                        "key": "Data",
+                                        "value": "Parameter 4"
+                                    }
+                                ]
+                            },
+                            "bounds": {
+                                "version": 2,
+                                "acceptsHWFocus": "No",
+                                "showWhenDataModelInvalid": "Hide",
+                                "whenVisible": "Always",
+                                "boundsType": "Absolute",
+                                "bounds": "365 195 495 46",
+                                "additionalInvalidatingHandles": [
+                                    "IndexedEnabling/1/2/Parameter 14"
+                                ]
+                            }
+                        },
+                        {
+                            "version": 2,
+                            "componentData": {
+                                "version": 1,
+                                "name": "VBAN active stream",
+                                "type": "Label",
+                                "data": {
+                                    "version": 1,
+                                    "textStyle": {
+                                        "version": 1,
+                                        "font": {
+                                            "version": 1,
+                                            "name": "Roboto",
+                                            "style": "Regular",
+                                            "height": 19.0
+                                        },
+                                        "colour": "fff0f3ed",
                                         "justification": "left verticallyCentred",
                                         "case": "Original"
                                     },
@@ -377,12 +594,15 @@
                                 ]
                             },
                             "bounds": {
-                                "version": 1,
+                                "version": 2,
                                 "acceptsHWFocus": "No",
-                                "showWhenDataModelInvalid": "Show",
+                                "showWhenDataModelInvalid": "Hide",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "40 403 350 32"
+                                "bounds": "445 240 410 29",
+                                "additionalInvalidatingHandles": [
+                                    "IndexedEnabling/1/2/Parameter 14"
+                                ]
                             }
                         },
                         {
@@ -399,9 +619,9 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 30.0
+                                            "height": 23.0
                                         },
-                                        "colour": "ffe3eadf",
+                                        "colour": "fff0f3ed",
                                         "justification": "left verticallyCentred",
                                         "case": "Original"
                                     },
@@ -424,14 +644,14 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "435 403 510 32"
+                                "bounds": "904 195 300 37"
                             }
                         },
                         {
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "lost",
+                                "name": "VBAN lost",
                                 "type": "Label",
                                 "data": {
                                     "version": 1,
@@ -441,9 +661,9 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 30.0
+                                            "height": 21.0
                                         },
-                                        "colour": "ffe3eadf",
+                                        "colour": "fff0f3ed",
                                         "justification": "left verticallyCentred",
                                         "case": "Original"
                                     },
@@ -461,12 +681,44 @@
                                 ]
                             },
                             "bounds": {
-                                "version": 1,
+                                "version": 2,
                                 "acceptsHWFocus": "No",
-                                "showWhenDataModelInvalid": "Show",
+                                "showWhenDataModelInvalid": "Hide",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "990 403 250 32"
+                                "bounds": "904 237 300 29",
+                                "additionalInvalidatingHandles": [
+                                    "IndexedEnabling/1/2/Parameter 14"
+                                ]
+                            }
+                        },
+                        {
+                            "version": 2,
+                            "componentData": {
+                                "version": 1,
+                                "name": "AirPlay device hint",
+                                "type": "Image",
+                                "data": {
+                                    "version": 2,
+                                    "imageType": "Regular",
+                                    "colour": "00000000",
+                                    "image": "airplay-hint.png"
+                                }
+                            },
+                            "handle remapping": {
+                                "version": 1,
+                                "map": []
+                            },
+                            "bounds": {
+                                "version": 2,
+                                "acceptsHWFocus": "No",
+                                "showWhenDataModelInvalid": "Hide",
+                                "whenVisible": "Always",
+                                "boundsType": "Absolute",
+                                "bounds": "895 234 315 34",
+                                "additionalInvalidatingHandles": [
+                                    "IndexedEnabling/0/2/Parameter 14"
+                                ]
                             }
                         },
                         {
@@ -500,7 +752,7 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "40 285 590 64"
+                                "bounds": "45 343 285 96"
                             }
                         },
                         {
@@ -534,86 +786,15 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "650 285 590 64"
+                                "bounds": "45 462 285 96"
                             }
                         },
                         {
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "latency",
-                                "type": "terminal fader",
-                                "data": {
-                                    "version": 1,
-                                    "handleName": "Data"
-                                }
-                            },
-                            "handle remapping": {
-                                "version": 1,
-                                "map": [
-                                    {
-                                        "key": "Data",
-                                        "value": "Parameter 2"
-                                    }
-                                ]
-                            },
-                            "bounds": {
-                                "version": 1,
-                                "acceptsHWFocus": "Yes",
-                                "showWhenDataModelInvalid": "Show",
-                                "whenVisible": "Always",
-                                "boundsType": "Absolute",
-                                "bounds": "40 465 380 116"
-                            }
-                        },
-                        {
-                            "version": 2,
-                            "componentData": {
-                                "version": 1,
-                                "name": "latency value",
-                                "type": "Label",
-                                "data": {
-                                    "version": 1,
-                                    "textStyle": {
-                                        "version": 1,
-                                        "font": {
-                                            "version": 1,
-                                            "name": "Roboto",
-                                            "style": "Regular",
-                                            "height": 34.0
-                                        },
-                                        "colour": "ff8fe07a",
-                                        "justification": "right verticallyCentred",
-                                        "case": "Original"
-                                    },
-                                    "type": "Value",
-                                    "handleName": "Data"
-                                }
-                            },
-                            "handle remapping": {
-                                "version": 1,
-                                "map": [
-                                    {
-                                        "key": "Data",
-                                        "value": "Parameter 2"
-                                    }
-                                ]
-                            },
-                            "bounds": {
-                                "version": 1,
-                                "acceptsHWFocus": "No",
-                                "showWhenDataModelInvalid": "Show",
-                                "whenVisible": "Always",
-                                "boundsType": "Absolute",
-                                "bounds": "260 471 138 43"
-                            }
-                        },
-                        {
-                            "version": 2,
-                            "componentData": {
-                                "version": 1,
-                                "name": "gain",
-                                "type": "terminal fader",
+                                "name": "output",
+                                "type": "output control",
                                 "data": {
                                     "version": 1,
                                     "handleName": "Data"
@@ -625,6 +806,10 @@
                                     {
                                         "key": "Data",
                                         "value": "Parameter 3"
+                                    },
+                                    {
+                                        "key": "Phase",
+                                        "value": "Parameter 17"
                                     }
                                 ]
                             },
@@ -634,14 +819,14 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "440 465 380 116"
+                                "bounds": "518 338 184 184"
                             }
                         },
                         {
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "gain value",
+                                "name": "output value",
                                 "type": "Label",
                                 "data": {
                                     "version": 1,
@@ -651,10 +836,10 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 34.0
+                                            "height": 29.0
                                         },
                                         "colour": "ff8fe07a",
-                                        "justification": "right verticallyCentred",
+                                        "justification": "horizontallyCentred verticallyCentred",
                                         "case": "Original"
                                     },
                                     "type": "Value",
@@ -676,7 +861,7 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "660 471 138 43"
+                                "bounds": "530 530 160 34"
                             }
                         },
                         {
@@ -689,7 +874,7 @@
                                     "version": 2,
                                     "imageType": "FilmStrip",
                                     "colour": "00000000",
-                                    "image": "terminal-meter-strip.png",
+                                    "image": "meter-strip.png",
                                     "numFrames": 23,
                                     "handleName": "Data",
                                     "animated": false
@@ -710,7 +895,7 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "890 509 330 20"
+                                "bounds": "899 398 330 28"
                             }
                         },
                         {
@@ -723,7 +908,7 @@
                                     "version": 2,
                                     "imageType": "FilmStrip",
                                     "colour": "00000000",
-                                    "image": "terminal-meter-strip.png",
+                                    "image": "meter-strip.png",
                                     "numFrames": 23,
                                     "handleName": "Data",
                                     "animated": false
@@ -744,14 +929,12 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "890 541 330 20"
+                                "bounds": "899 453 330 28"
                             }
                         }
                     ]
                 },
-                "qlinkBoundsData": [
-                    "40 245 1200 336"
-                ]
+                "qlinkBoundsData": []
             },
             {
                 "version": 1,
@@ -787,7 +970,7 @@
                                     "version": 2,
                                     "imageType": "Regular",
                                     "colour": "00000000",
-                                    "image": "terminal-diagnostics.png"
+                                    "image": "physical-diagnostics.png"
                                 }
                             },
                             "handle remapping": {
@@ -817,7 +1000,7 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 36.0
+                                            "height": 34.0
                                         },
                                         "colour": "ff8fe07a",
                                         "justification": "left verticallyCentred",
@@ -842,7 +1025,7 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "60 151 340 55"
+                                "bounds": "65 190 335 48"
                             }
                         },
                         {
@@ -859,7 +1042,7 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 36.0
+                                            "height": 34.0
                                         },
                                         "colour": "ff8fe07a",
                                         "justification": "left verticallyCentred",
@@ -884,7 +1067,7 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "460 151 340 55"
+                                "bounds": "455 190 335 48"
                             }
                         },
                         {
@@ -901,7 +1084,7 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 36.0
+                                            "height": 34.0
                                         },
                                         "colour": "ff8fe07a",
                                         "justification": "left verticallyCentred",
@@ -926,7 +1109,7 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "860 151 360 55"
+                                "bounds": "850 190 345 48"
                             }
                         },
                         {
@@ -943,7 +1126,7 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 36.0
+                                            "height": 31.0
                                         },
                                         "colour": "ff8fe07a",
                                         "justification": "left verticallyCentred",
@@ -968,14 +1151,14 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "60 298 1160 47"
+                                "bounds": "65 313 1130 47"
                             }
                         },
                         {
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "active stream",
+                                "name": "stream",
                                 "type": "Label",
                                 "data": {
                                     "version": 1,
@@ -985,7 +1168,7 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 36.0
+                                            "height": 31.0
                                         },
                                         "colour": "ff8fe07a",
                                         "justification": "left verticallyCentred",
@@ -1010,14 +1193,14 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "60 432 540 48"
+                                "bounds": "65 412 540 45"
                             }
                         },
                         {
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "audio format",
+                                "name": "format",
                                 "type": "Label",
                                 "data": {
                                     "version": 1,
@@ -1027,7 +1210,7 @@
                                             "version": 1,
                                             "name": "Roboto",
                                             "style": "Regular",
-                                            "height": 36.0
+                                            "height": 31.0
                                         },
                                         "colour": "ff8fe07a",
                                         "justification": "left verticallyCentred",
@@ -1052,23 +1235,18 @@
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "660 432 560 48"
+                                "bounds": "665 412 530 45"
                             }
                         },
                         {
                             "version": 2,
                             "componentData": {
                                 "version": 1,
-                                "name": "meter refresh 10",
-                                "type": "Button",
+                                "name": "VBAN buffer",
+                                "type": "buffer setting",
                                 "data": {
-                                    "version": 2,
-                                    "onImage": "refresh10_on.png",
-                                    "offImage": "refresh10_off.png",
-                                    "buttonId": 0,
-                                    "numButtonsInGroup": 2,
-                                    "handleName": "Data",
-                                    "gestureBehaviour": "Instant"
+                                    "version": 1,
+                                    "handleName": "Data"
                                 }
                             },
                             "handle remapping": {
@@ -1076,51 +1254,17 @@
                                 "map": [
                                     {
                                         "key": "Data",
-                                        "value": "Parameter 15"
+                                        "value": "Parameter 2"
                                     }
                                 ]
                             },
                             "bounds": {
                                 "version": 1,
-                                "acceptsHWFocus": "No",
+                                "acceptsHWFocus": "Yes",
                                 "showWhenDataModelInvalid": "Show",
                                 "whenVisible": "Always",
                                 "boundsType": "Absolute",
-                                "bounds": "840 530 180 48"
-                            }
-                        },
-                        {
-                            "version": 2,
-                            "componentData": {
-                                "version": 1,
-                                "name": "meter refresh 24",
-                                "type": "Button",
-                                "data": {
-                                    "version": 2,
-                                    "onImage": "refresh24_on.png",
-                                    "offImage": "refresh24_off.png",
-                                    "buttonId": 1,
-                                    "numButtonsInGroup": 2,
-                                    "handleName": "Data",
-                                    "gestureBehaviour": "Instant"
-                                }
-                            },
-                            "handle remapping": {
-                                "version": 1,
-                                "map": [
-                                    {
-                                        "key": "Data",
-                                        "value": "Parameter 15"
-                                    }
-                                ]
-                            },
-                            "bounds": {
-                                "version": 1,
-                                "acceptsHWFocus": "No",
-                                "showWhenDataModelInvalid": "Show",
-                                "whenVisible": "Always",
-                                "boundsType": "Absolute",
-                                "bounds": "1040 530 180 48"
+                                "bounds": "65 512 220 48"
                             }
                         }
                     ]

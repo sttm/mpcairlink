@@ -5,6 +5,10 @@
 #include <vector>
 using namespace airlink;
 int main() {
+    // The DIAG buffer belongs to VBAN; AirPlay ignores even saved extreme values.
+    for(int ms=10;ms<=150;++ms){assert(airlink::playbackBufferMs(1,ms)==ms);assert(airlink::playbackBufferMs(2,ms)==120);}
+    assert(airlink::playbackBufferMs(1,-1)==10&&airlink::playbackBufferMs(1,999)==150);
+
     std::array<uint8_t,40> b{}; std::memcpy(b.data(),"VBAN",4); b[4]=3; b[5]=1; b[6]=1; b[7]=1; std::memcpy(b.data()+8,"Stream1",7);
     b[28]=0; b[29]=128; b[30]=255; b[31]=127;
     Packet p; assert(p.parse(b.data(),36)); assert(p.rate==48000 && p.frames==2 && p.channels==2);

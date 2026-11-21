@@ -13,7 +13,7 @@ The scanner also reports exported capabilities in bundled upstream binaries: Ope
 
 Only maintainers should set `flags_reviewed` in the catalog. This submission does not set it.
 
-## Helper build licence audit — 1.1.1
+## Helper build licence audit — 1.3.0
 
 Classic AirPlay is built without CONFIG_AIRPLAY_2 and CONFIG_CONVOLUTION.
 Upstream conditional rules exclude ptp-utilities.c / nqptp-shm-structures.h and
@@ -26,3 +26,5 @@ This audit concerns this configuration, not every possible Shairport Sync build.
 The distributed code licence expression is MIT AND BSD-3-Clause AND Apache-2.0
 AND LGPL-2.1-or-later. Font and CC0 icon notices stay in the repo/package; they do
 not require a change to the catalog's global OPEN_LICENSES policy.
+
+Both 1.3.0 helper binaries rebuilt cleanly and match the audited 1.1.1 SHA256 values. Networking/process capabilities and generated configuration are unchanged.

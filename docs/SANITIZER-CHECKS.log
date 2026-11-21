@@ -1,0 +1,14 @@
+g++ -std=c++17 -O2 -Wall -Wextra -Werror -pthread -isystem vendor/mpc-plugin-builder-sdk/framework -Isrc -O1 -g -fsanitize=address,undefined tests/core_test.cpp -o build/core_sanitize
+./build/core_sanitize
+PASS parser (PCM16/24/float/NaN/malformed/rates), million-frame concurrent SPSC, rate conversion, prebuffer/fades
+g++ -std=c++17 -O2 -Wall -Wextra -Werror -pthread -isystem vendor/mpc-plugin-builder-sdk/framework -Isrc -O1 -g -fsanitize=address,undefined tests/network_test.cpp src/Receiver.cpp src/AirPlayProcess.cpp -o build/network_sanitize
+./build/network_sanitize
+UDP measurements: meanSquare=0.124229 stereoError=0 Hz=1000.98
+PASS UDP loopback: PCM16 stereo 48k->44.1k, pitch=1000.98 Hz, timeout, ANY-only sender lock, PCM24 mono, float32, sequence wrap/loss/duplicates, host-rate change
+g++ -std=c++17 -O2 -Wall -Wextra -Werror -pthread -isystem vendor/mpc-plugin-builder-sdk/framework -Isrc -O1 -g -fsanitize=address,undefined tests/vban_queue_test.cpp -o build/vban_queue_sanitize
+./build/vban_queue_sanitize
+PASS VBAN reorder, uint32 wrap, duplicates, gap deadline, time-preserving concealment, bounded restart, idle
+g++ -std=c++17 -O2 -Wall -Wextra -Werror -pthread -isystem vendor/mpc-plugin-builder-sdk/framework -Isrc -O1 -g -fsanitize=address,undefined tests/vban_loss_test.cpp src/Receiver.cpp src/AirPlayProcess.cpp -o build/vban_loss_sanitize
+./build/vban_loss_sanitize
+Loss test: missing=6 expected=6 overflow=0 trim=0 underruns=0
+PASS real UDP: 256-frame VBAN, reorder+duplicates+1% loss, preserved timeline, zero FIFO drops/underruns
